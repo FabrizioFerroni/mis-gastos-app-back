@@ -9,6 +9,6 @@ sonar.sourceEncoding=UTF-8
 sonar.language=ts
 sonar.ts.tslintconfigpath=tslint.json
 
-sonar.host.url=http://sonarqube:9000
+sonar.host.url=http://localhost:9000
 sonar.login=
 sonar.password=

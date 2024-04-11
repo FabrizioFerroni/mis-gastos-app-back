@@ -2,6 +2,7 @@ keys.json
 # compiled output
 /.scannerwork
 /notes
+sonar.properties
 
 ### Build ###
 dist
