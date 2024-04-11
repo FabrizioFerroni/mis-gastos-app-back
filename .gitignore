@@ -1,3 +1,8 @@
+keys.json
+# compiled output
+/.scannerwork
+/notes
+
 ### Build ###
 dist
 
