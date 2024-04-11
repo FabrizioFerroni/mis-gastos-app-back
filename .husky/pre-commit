@@ -6,5 +6,8 @@ if [ "$branch" = "prod" ] || [ "$branch" = "pre" ]; then
   exit 1
 fi
 
+echo "Corre comando lint"
 npm run lint
+
+echo "Corre comando lint-staged"
 npx lint-staged
