@@ -1,0 +1,53 @@
+version: '3.9'
+
+services:
+  api-db:
+    container_name: db_misgastosapp
+    image: postgres:14-alpine
+    restart: always
+    ports:
+      - 54322:5432
+    volumes:
+      - psql_dev:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=postgre1234
+      - POSTGRES_USER=postgre
+      - POSTGRES_DB=MISGASTOSAPP
+    networks:
+      - misgastosapp-network
+
+  cache:
+    image: redis:6.2-alpine
+    restart: always
+    depends_on:
+      - postgres
+    ports:
+      - '6379:6379'
+    command: redis-server --save 20 1 --loglevel warning --requirepass eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
+    volumes:
+      - cache:/data
+    networks:
+      - misgastosapp-network
+
+  api-server:
+    container_name: api_misgastosonline
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - api-db
+    restart: always
+    environment:
+      - DATABASE_HOST=api-db
+      - DATABASE_USER=postgre
+      - DATABASE_PASSWORD=postgre1234
+      - DATABASE_NAME=MISGASTOSAPP
+      - DATABASE_PORT=5432
+    networks:
+      - misgastosapp-network
+
+volumes:
+  cache:
+    driver: local
+  psql_dev:
+    driver: local
