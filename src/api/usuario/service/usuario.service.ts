@@ -12,6 +12,8 @@ import { ResponseUsuarioDto } from '../dto/response/response.user.dto';
 import { UserMessagesError } from '../errors/error-messages';
 import { hashPassword } from '@/shared/utils/functions/validate-passwords';
 import { plainToInstance } from 'class-transformer';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 
 @Injectable()
 export class UsuarioService {
@@ -20,6 +22,7 @@ export class UsuarioService {
     private readonly usuarioRepository: UsuarioInterfaceRepository,
     @Inject(TransformDto)
     private readonly transform: TransformDto<UsuarioEntity, ResponseUsuarioDto>,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
   async create(dto: AgregarUsuarioDto) {
@@ -50,8 +53,16 @@ export class UsuarioService {
   }
 
   async findAll() {
+    const key: string = 'usuarios';
+    const userCache = await this.cacheManager.get(key);
     const resp = await this.usuarioRepository.obtenerTodos();
-    return this.transform.transformDtoArray(resp, ResponseUsuarioDto);
+    const users = this.transform.transformDtoArray(resp, ResponseUsuarioDto);
+
+    if (userCache) return userCache;
+
+    await this.cacheManager.set(key, users, 1000 * 30);
+
+    return users;
   }
 
   async findOne(id: string) {
