@@ -10,7 +10,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
 
-  const hostCors = configService.get<string>('FRONT_HOST');
+  const hostCors = configService.get<string[]>('FRONT_HOST');
   const hostMethods = configService.get<string[]>('HOST_METHODS');
   const hostallowedHeaders = configService.get<string[]>(
     'HOST_ALLOWED_HEADERS',
@@ -20,7 +20,7 @@ async function bootstrap() {
   const apiPort = configService.get<number>('API_PORT');
 
   app.enableCors({
-    origin: [hostCors],
+    origin: hostCors,
     credentials: hostCredentials,
     methods: hostMethods,
     allowedHeaders: hostallowedHeaders,

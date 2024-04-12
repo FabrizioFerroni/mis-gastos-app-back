@@ -20,7 +20,6 @@ export type ConfigAppRedis = {
 };
 
 export type DbConfig = {
-  type: string;
   host: string;
   port: number;
   user: string;

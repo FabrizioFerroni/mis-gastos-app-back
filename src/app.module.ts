@@ -9,6 +9,7 @@ import { ApiModule } from './api/api.module';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { CustomExceptionFilter } from './shared/filters/exceptions.filter';
 import { ResponseInterceptor } from './shared/intenceptors/response.interceptor';
+import { DatabaseModule } from './config/database/database.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { ResponseInterceptor } from './shared/intenceptors/response.interceptor'
     ]),
     CoreModule,
     ApiModule,
+    DatabaseModule,
   ],
   controllers: [],
   providers: [

@@ -18,12 +18,11 @@ export const configApp = (): ConfigApp => {
       password: process.env.REDIS_PASSWORD || '',
     },
     db: {
-      type: process.env.BD_TYPE || 'mysql',
       host: process.env.BD_HOST || 'localhost',
       port: Number(process.env.BD_PORT) || 3306,
-      user: process.env.BD_USER || '',
-      pass: process.env.BD_PASS || '',
-      bd: process.env.BD_DB || '',
+      user: process.env.BD_USER || 'root',
+      pass: process.env.BD_PASS || 'root1234',
+      bd: process.env.BD_DB || 'misgastosapp',
     },
   };
 };
