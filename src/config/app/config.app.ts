@@ -13,7 +13,7 @@ export const configApp = (): ConfigApp => {
     mailServiceUrl: process.env.URL_MAIL_SERVICE || '',
     redis: {
       host: process.env.REDIS_HOST || 'localhost',
-      port: Number(process.env.REDIS_PORT) || 16366,
+      port: Number(process.env.REDIS_PORT) || 6379,
       username: process.env.REDIS_USERNAME || '',
       password: process.env.REDIS_PASSWORD || '',
     },

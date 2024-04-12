@@ -10,10 +10,22 @@ import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { CustomExceptionFilter } from './shared/filters/exceptions.filter';
 import { ResponseInterceptor } from './shared/intenceptors/response.interceptor';
 import { DatabaseModule } from './config/database/database.module';
+import { CacheModule } from '@nestjs/cache-manager';
+import { redisStore } from 'cache-manager-redis-yet';
 
 @Module({
   imports: [
-    // Config module
+    CacheModule.registerAsync({
+      isGlobal: true,
+      useFactory: async () => ({
+        store: await redisStore({
+          socket: {
+            host: configApp().redis.host,
+            port: configApp().redis.port,
+          },
+        }),
+      }),
+    }),
     ConfigModule.forRoot({
       isGlobal: true,
       load: [configApp],
