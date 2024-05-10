@@ -15,6 +15,12 @@ import { redisStore } from 'cache-manager-redis-yet';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      load: [configApp],
+      envFilePath: ['.env'],
+    }),
+
     CacheModule.registerAsync({
       isGlobal: true,
       useFactory: async () => ({
@@ -26,11 +32,7 @@ import { redisStore } from 'cache-manager-redis-yet';
         }),
       }),
     }),
-    ConfigModule.forRoot({
-      isGlobal: true,
-      load: [configApp],
-      envFilePath: ['.env'],
-    }),
+
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'swagger-static'),
       serveRoot: process.env.NODE_ENV === 'development' ? '/' : '/swagger',
