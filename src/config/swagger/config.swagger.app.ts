@@ -1,14 +1,16 @@
-import * as express from 'express';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import { INestApplication } from '@nestjs/common';
 import { join } from 'path';
+import { Request, Response } from 'express';
+import * as express from 'express';
 
 export const setupSwagger = (
   app: INestApplication,
   configService: ConfigService,
 ) => {
-  if (configService.get<string>('NODE_ENV') === 'production') {
+  const entorno = configService.get<string>('NODE_ENV');
+  if (entorno === 'production') {
     const swaggerPath = join(__dirname, '..', 'node_modules/swagger-ui-dist');
     app.use('/swagger-ui', express.static(swaggerPath));
   } else {
@@ -29,6 +31,14 @@ export const setupSwagger = (
     })
     .build();
 
-  const document = SwaggerModule.createDocument(app, configSwagger);
-  SwaggerModule.setup('/', app, document);
+  if (entorno !== 'production') {
+    const document = SwaggerModule.createDocument(app, configSwagger);
+    SwaggerModule.setup('/', app, document);
+  } else {
+    app.use('/', async (req: Request, res: Response) => {
+      res
+        .status(200)
+        .json({ mensaje: 'Bienvenido a la api de Mis Gastos App' });
+    });
+  }
 };

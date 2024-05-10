@@ -3,7 +3,7 @@ import { ConfigApp } from '@/config/types/config.app.type';
 export const configApp = (): ConfigApp => {
   return {
     env: process.env.NODE_ENV || 'development',
-    apiPort: Number(process.env.API_PORT) || 4000,
+    apiPort: Number(process.env.API_PORT) || 8080,
     limit: Number(process.env.THROTTLE_LIMIT) || 10,
     ttl: Number(process.env.THROTTLE_TTL) || 6000,
     max_pass_failures: Number(process.env.MAX_PASS_FAILURES),
@@ -16,13 +16,14 @@ export const configApp = (): ConfigApp => {
       port: Number(process.env.REDIS_PORT) || 6379,
       username: process.env.REDIS_USERNAME || '',
       password: process.env.REDIS_PASSWORD || '',
+      ttl: Number(process.env.REDIS_TTL) || 30000,
     },
-    db: {
-      host: process.env.BD_HOST || 'localhost',
-      port: Number(process.env.BD_PORT) || 3306,
-      user: process.env.BD_USER || 'root',
-      pass: process.env.BD_PASS || 'root1234',
-      bd: process.env.BD_DB || 'misgastosapp',
+    database: {
+      host: process.env.DATABASE_HOST || 'localhost',
+      port: Number(process.env.DATABASE_PORT) || 3306,
+      username: process.env.DATABASE_USER || 'root',
+      password: process.env.DATABASE_PASSWORD || '',
+      database: process.env.DATABASE_BASEDATOS || '',
     },
   };
 };
