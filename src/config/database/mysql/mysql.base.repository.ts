@@ -3,7 +3,9 @@ import {
   FindManyOptions,
   FindOneOptions,
   FindOptionsWhere,
+  QueryRunner,
   Repository,
+  SelectQueryBuilder,
   UpdateResult,
 } from 'typeorm';
 import { BaseInterfaceRepository } from './mysql.base.interface.repository';
@@ -34,6 +36,17 @@ export abstract class BaseAbstractRepository<T extends HasId>
     return this.entity.create(data);
   }
 
+  public async queryBuilder(
+    alias: string,
+    queryRunner: QueryRunner,
+  ): Promise<SelectQueryBuilder<T>> {
+    return await this.entity.createQueryBuilder(alias, queryRunner);
+  }
+
+  public async query(query: string, parameters?: any[]): Promise<any> {
+    return await this.entity.query(query, parameters);
+  }
+
   public createMany(data: DeepPartial<T>[]): T[] {
     return this.entity.create(data);
   }
@@ -55,6 +68,10 @@ export abstract class BaseAbstractRepository<T extends HasId>
 
   public async findAll(options?: FindManyOptions<T>): Promise<T[]> {
     return await this.entity.find(options);
+  }
+
+  public async findBorrado(options?: FindOptionsWhere<T>): Promise<T> {
+    return await this.entity.findOneBy(options);
   }
 
   public async remove(data: T): Promise<T> {
@@ -82,5 +99,9 @@ export abstract class BaseAbstractRepository<T extends HasId>
 
   public async preload(entityLike: DeepPartial<T>): Promise<T> {
     return await this.entity.preload(entityLike);
+  }
+
+  public async exists(options: FindManyOptions<T>): Promise<boolean> {
+    return await this.entity.exists(options);
   }
 }
