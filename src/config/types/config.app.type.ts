@@ -9,7 +9,7 @@ export type ConfigApp = {
   secret_jwt_register: string;
   mailServiceUrl: string;
   passPrivateKey: string;
-  db: DbConfig;
+  database: DbConfig;
 };
 
 export type ConfigAppRedis = {
@@ -17,12 +17,13 @@ export type ConfigAppRedis = {
   port: number;
   username: string;
   password: string;
+  ttl: number;
 };
 
 export type DbConfig = {
   host: string;
   port: number;
-  user: string;
-  pass: string;
-  bd: string;
+  username: string;
+  password: string;
+  database: string;
 };
