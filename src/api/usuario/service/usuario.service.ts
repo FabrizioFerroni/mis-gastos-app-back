@@ -10,10 +10,15 @@ import { AgregarUsuarioDto } from '../dto/create.user.dto';
 import { TransformDto } from '@/shared/utils';
 import { ResponseUsuarioDto } from '../dto/response/response.user.dto';
 import { UserMessagesError } from '../errors/error-messages';
-import { hashPassword } from '@/shared/utils/functions/validate-passwords';
+import {
+  hashPassword,
+  validatePassword,
+} from '@/shared/utils/functions/validate-passwords';
 import { plainToInstance } from 'class-transformer';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
+import { EditarUsuarioDto } from '../dto/update.user';
+import { configApp } from '@/config/app/config.app';
 
 @Injectable()
 export class UsuarioService {
@@ -52,15 +57,24 @@ export class UsuarioService {
     return await this.usuarioRepository.guardar(data);
   }
 
-  async findAll() {
+  async findAll(deletedAt: boolean, skip?: number, take?: number) {
     const key: string = 'usuarios';
-    const userCache = await this.cacheManager.get(key);
-    const resp = await this.usuarioRepository.obtenerTodos();
-    const users = this.transform.transformDtoArray(resp, ResponseUsuarioDto);
+    const userCache: UsuarioEntity[] = await this.cacheManager.get(key);
+    const resp: UsuarioEntity[] = await this.usuarioRepository.obtenerTodos(
+      deletedAt,
+      skip,
+      take,
+    );
 
-    if (userCache) return userCache;
+    const users: UsuarioEntity[] = this.transform.transformDtoArray(
+      resp,
+      ResponseUsuarioDto,
+    );
 
-    await this.cacheManager.set(key, users, 1000 * 30);
+    if (userCache)
+      return this.transform.transformDtoArray(userCache, ResponseUsuarioDto);
+
+    await this.cacheManager.set(key, users, configApp().redis.ttl);
 
     return users;
   }
@@ -77,16 +91,57 @@ export class UsuarioService {
     return this.transform.transformDtoObject(user, ResponseUsuarioDto);
   }
 
-  async update(id: string) {
-    return `This action updates a #${id} fakes2`;
+  async update(id: string, data: EditarUsuarioDto) {
+    delete data.confirm_password;
+    await this.validateEmailBD(data.email, id);
+
+    const user = await this.usuarioRepository.obtenerPorId(id);
+
+    if (!user) throw new BadRequestException('Usuario no encontrado');
+
+    if (data.old_password) {
+      const samePassword = await validatePassword(
+        data.old_password,
+        user.password,
+      );
+
+      if (!samePassword)
+        throw new BadRequestException(
+          'La contraseña ingresada no coincide con la contraseña anterior',
+        );
+    }
+
+    delete data.old_password;
+
+    if (data.password) data.password = await hashPassword(data.password);
+
+    const userToUpdate: Partial<UsuarioEntity> = {};
+
+    if (data.localizacion) userToUpdate.geoLocalizacion = data.localizacion;
+    delete data.localizacion;
+
+    for (const key in data) {
+      if (data[key] !== undefined && data[key] !== null) {
+        userToUpdate[key] = data[key];
+      }
+    }
+
+    const userUpdate = await this.usuarioRepository.actualizar(
+      id,
+      userToUpdate as UsuarioEntity,
+    );
+
+    if (!userUpdate) {
+      return UserMessagesError.USER_ERROR;
+    }
+
+    return UserMessagesError.USER_UPDATED;
   }
 
   async remove(id: string) {
-    /* const user = await this.usuarioRepository.obtenerPorId(id);
+    const userExist = await this.usuarioRepository.existeReg(id);
 
-    if (!user) {
-      throw new NotFoundException('Usuario no encontrado');
-    } */
+    if (!userExist) throw new BadRequestException('Usuario no encontrado');
 
     const deleted = await this.usuarioRepository.borrar(id);
 
@@ -95,6 +150,20 @@ export class UsuarioService {
     }
 
     return 'Usuario eliminado con éxito';
+  }
+
+  async recover(id: string) {
+    const userExist = await this.usuarioRepository.existeReg(id, true);
+
+    if (!userExist) throw new BadRequestException('Usuario no encontrado');
+
+    const restore = await this.usuarioRepository.restaurar(id);
+
+    if (!restore.affected) {
+      throw new BadRequestException('No se pudo restaurar el usuario');
+    }
+
+    return 'Usuario restaurado con éxito';
   }
 
   async validateEmailBD(email: string, id?: string): Promise<void> {

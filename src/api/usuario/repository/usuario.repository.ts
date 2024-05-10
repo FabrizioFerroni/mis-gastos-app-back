@@ -1,12 +1,14 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
 import { InjectRepository } from '@nestjs/typeorm';
-import { Not, Repository, UpdateResult } from 'typeorm';
+import { IsNull, Not, Repository, UpdateResult } from 'typeorm';
 import { UsuarioEntity } from '../entity/usuario.entity';
 import { BaseAbstractRepository } from '@/config/database/mysql/mysql.base.repository';
 import { UsuarioInterfaceRepository } from './usuario.interface.repository';
 import { plainToInstance } from 'class-transformer';
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, Inject } from '@nestjs/common';
+import { TransformDto } from '@/shared/utils';
+import { ResponseUsuarioDto } from '../dto/response/response.user.dto';
 
 export class UsuarioRepository
   extends BaseAbstractRepository<UsuarioEntity>
@@ -15,6 +17,8 @@ export class UsuarioRepository
   constructor(
     @InjectRepository(UsuarioEntity)
     public repository: Repository<UsuarioEntity>,
+    @Inject(TransformDto)
+    private readonly transform: TransformDto<UsuarioEntity, ResponseUsuarioDto>,
   ) {
     super(repository);
   }
@@ -29,8 +33,20 @@ export class UsuarioRepository
     return userSaved;
   }
 
-  async obtenerTodos(): Promise<UsuarioEntity[]> {
-    return await this.findAll();
+  async obtenerTodos(
+    deletedAt: boolean,
+    skip?: number,
+    take?: number,
+  ): Promise<UsuarioEntity[]> {
+    const options = {
+      withDeleted: deletedAt,
+      skip: skip || 0,
+      take: take || 0,
+    };
+
+    //TODO: Ver porque el withDeleted no funciona en esta funcion.
+
+    return await this.findAll(options);
   }
 
   async obtenerPorId(id: string): Promise<UsuarioEntity> {
@@ -41,8 +57,8 @@ export class UsuarioRepository
     return await this.softDelete(id);
   }
 
-  actualizar(id: string, fake: UsuarioEntity): Promise<UsuarioEntity> {
-    throw new Error('Method not implemented.');
+  async actualizar(id: string, data: UsuarioEntity): Promise<UpdateResult> {
+    return await this.update(id, data);
   }
 
   async obtenerRelaciones(): Promise<UsuarioEntity[]> {
@@ -75,5 +91,20 @@ export class UsuarioRepository
     }
 
     return !!result;
+  }
+
+  async existeReg(id: string, deleted?: boolean) {
+    const options = {
+      where: {
+        id: id,
+      },
+      withDeleted: deleted,
+    };
+
+    return await this.exists(options);
+  }
+
+  async restaurar(id: string) {
+    return await this.restore(id);
   }
 }
