@@ -42,6 +42,9 @@ export class UsuarioRepository
       withDeleted: deletedAt,
       skip: skip || 0,
       take: take || 0,
+      relations: {
+        cuentas: true,
+      },
     };
 
     //TODO: Ver porque el withDeleted no funciona en esta funcion.

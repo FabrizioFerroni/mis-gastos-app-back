@@ -1,3 +1,4 @@
+import { CuentaEntity } from '@/api/cuentas/entity/cuenta.entity';
 import { Exclude, Expose, Transform } from 'class-transformer';
 
 export class ResponseUsuarioDto {
@@ -46,4 +47,7 @@ export class ResponseUsuarioDto {
 
   @Exclude()
   deletedAt: Date;
+
+  @Expose()
+  cuentas: CuentaEntity[];
 }

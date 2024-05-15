@@ -1,8 +1,10 @@
+import { CuentaEntity } from '@/api/cuentas/entity/cuenta.entity';
 import {
   Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   Unique,
   UpdateDateColumn,
@@ -23,19 +25,19 @@ export class UsuarioEntity {
   @Column()
   email: string;
 
-  @Column()
+  @Column({ select: false })
   password: string;
 
-  @Column({ default: false })
+  @Column({ default: false, select: true })
   active: boolean;
 
   @Column({ nullable: true })
   avatar: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, select: false })
   token: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, select: false })
   expiration_token: Date;
 
   @Column({ nullable: true })
@@ -44,12 +46,15 @@ export class UsuarioEntity {
   @Column({ name: 'localizacion', nullable: true })
   geoLocalizacion: string;
 
-  @CreateDateColumn({ name: 'created_at' })
+  @CreateDateColumn({ name: 'created_at', select: false })
   createdAt!: Date;
 
-  @UpdateDateColumn({ name: 'updated_at' })
+  @UpdateDateColumn({ name: 'updated_at', select: false })
   updatedAt!: Date;
 
-  @DeleteDateColumn({ name: 'deleted_at' })
+  @DeleteDateColumn({ name: 'deleted_at', select: false })
   deletedAt?: Date;
+
+  @OneToMany(() => CuentaEntity, (cuenta) => cuenta.usuario)
+  cuentas: CuentaEntity[];
 }
