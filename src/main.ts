@@ -38,7 +38,7 @@ async function bootstrap() {
       },
     }),
   );
-  app.setGlobalPrefix(configStrings().apiVersion);
+  app.setGlobalPrefix(configStrings().apiVersion, { exclude: ['estado'] });
   setupSwagger(app, configService);
 
   await app.listen(apiPort);
