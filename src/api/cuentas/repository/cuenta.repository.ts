@@ -4,7 +4,7 @@ import { CuentaInterfaceRepository } from './cuenta.interface.repository';
 import { BaseAbstractRepository } from '@/config/database/mysql/mysql.base.repository';
 import { Not, Repository, UpdateResult } from 'typeorm';
 import { TransformDto } from '@/shared/utils';
-import { BadRequestException, Inject } from '@nestjs/common';
+import { Inject, Logger } from '@nestjs/common';
 import { ResponseCuentaDto } from '../dto/response/response.cuenta.dto';
 import { UsuarioEntity } from '@/api/usuario/entity/usuario.entity';
 
@@ -12,6 +12,10 @@ export class CuentaRepository
   extends BaseAbstractRepository<CuentaEntity>
   implements CuentaInterfaceRepository
 {
+  private readonly logger = new Logger(CuentaRepository.name, {
+    timestamp: true,
+  });
+
   constructor(
     @InjectRepository(CuentaEntity)
     public repository: Repository<CuentaEntity>,
@@ -56,10 +60,6 @@ export class CuentaRepository
   async guardar(data: CuentaEntity): Promise<CuentaEntity> {
     const create: CuentaEntity = this.create(data);
     const cuentaSaved: CuentaEntity = await this.save(create);
-
-    if (!cuentaSaved)
-      throw new BadRequestException('No se pudo crear la cuenta al usuario');
-
     return cuentaSaved;
   }
 

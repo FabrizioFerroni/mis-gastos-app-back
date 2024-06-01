@@ -1,4 +1,8 @@
 import {
+  CuentaErrorMensaje,
+  CuentaMensaje,
+} from './../messages/cuenta.message';
+import {
   BadRequestException,
   Inject,
   Injectable,
@@ -15,10 +19,13 @@ import { configApp } from '@/config/app/config.app';
 import { AgregarCuentaDto } from '../dto/create.cuenta.dto';
 import { plainToInstance } from 'class-transformer';
 import { UsuarioService } from '@/api/usuario/service/usuario.service';
+import { EditarCuentaDto } from '../dto/update.cuenta.dto';
 
 @Injectable()
 export class CuentaService {
   private readonly logger = new Logger(CuentaService.name, { timestamp: true });
+
+  // TODO: cuando se hace una creacion, actualizacion, borrado y restaurado de cuenta hay que actualizar el cache para que traiga los datos correctamente.
 
   constructor(
     @Inject(CuentaInterfaceRepository)
@@ -111,7 +118,74 @@ export class CuentaService {
 
     const data = plainToInstance(CuentaEntity, newAccount);
 
-    return await this.cuentaRepository.guardar(data);
+    const accountSaved = await this.cuentaRepository.guardar(data);
+
+    if (!accountSaved) {
+      throw new BadRequestException(CuentaErrorMensaje.ACCOUNT_NOT_SAVED);
+    }
+
+    return CuentaMensaje.ACCOUNT_OK;
+  }
+
+  async update(id: string, dto: EditarCuentaDto) {
+    const { nombre, nro_cuenta } = dto;
+
+    const cuenta = await this.cuentaRepository.obtenerPorId(id);
+
+    if (!cuenta)
+      throw new NotFoundException(CuentaErrorMensaje.ACCOUNT_NOT_FOUND);
+
+    await this.validateNombreBD(nombre, id);
+    await this.validateNroCuentaBD(nro_cuenta, id);
+
+    const cuentaToUpdate: Partial<CuentaEntity> = {};
+
+    for (const key in dto) {
+      if (dto[key] !== undefined && dto[key] !== null) {
+        cuentaToUpdate[key] = dto[key];
+      }
+    }
+
+    const cuentaUpdated = await this.cuentaRepository.actualizar(
+      id,
+      cuentaToUpdate as CuentaEntity,
+    );
+
+    if (!cuentaUpdated) {
+      return CuentaErrorMensaje.ACCOUNT_NOT_SAVED;
+    }
+
+    return CuentaMensaje.ACCOUNT_UPDATED;
+  }
+
+  async remove(id: string) {
+    const cuenta = await this.cuentaRepository.existeRegistro(id);
+
+    if (!cuenta)
+      throw new NotFoundException(CuentaErrorMensaje.ACCOUNT_NOT_FOUND);
+
+    const deleted = await this.cuentaRepository.borrar(id);
+
+    if (!deleted.affected) {
+      throw new BadRequestException(CuentaErrorMensaje.ACCOUNT_NOT_DELETED);
+    }
+
+    return CuentaMensaje.ACCOUNT_DELETED;
+  }
+
+  async recover(id: string) {
+    const userExist = await this.cuentaRepository.existeRegistro(id, true);
+
+    if (!userExist)
+      throw new NotFoundException(CuentaErrorMensaje.ACCOUNT_NOT_FOUND);
+
+    const restore = await this.cuentaRepository.restaurar(id);
+
+    if (!restore.affected) {
+      throw new BadRequestException(CuentaErrorMensaje.ACCOUNT_NOT_RESTORED);
+    }
+
+    return CuentaMensaje.ACCOUNT_RESTORED;
   }
 
   // validations
@@ -119,9 +193,8 @@ export class CuentaService {
     const existInBD = await this.cuentaRepository.cuentaYaExiste(nombre, id);
 
     if (existInBD) {
-      throw new BadRequestException(
-        `La cuenta con el nombre: ${nombre} ya existe`,
-      );
+      this.logger.error(CuentaErrorMensaje.ACCOUNT_NOMBRE_EXIST);
+      throw new BadRequestException(CuentaErrorMensaje.ACCOUNT_NOMBRE_EXIST);
     }
   }
 
@@ -133,7 +206,7 @@ export class CuentaService {
 
     if (existInBD) {
       throw new BadRequestException(
-        `La cuenta con el numero de cuenta: ${nroCuenta} ya existe`,
+        CuentaErrorMensaje.ACCOUNT_NRO_CUENTA_EXIST,
       );
     }
   }
