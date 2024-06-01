@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Inject,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { UsuarioInterfaceRepository } from '../repository/usuario.interface.repository';
@@ -22,8 +23,12 @@ import { configApp } from '@/config/app/config.app';
 
 @Injectable()
 export class UsuarioService {
+  private readonly logger = new Logger(UsuarioService.name, {
+    timestamp: true,
+  });
+
   constructor(
-    @Inject('UsuarioInterfaceRepository')
+    @Inject(UsuarioInterfaceRepository)
     private readonly usuarioRepository: UsuarioInterfaceRepository,
     @Inject(TransformDto)
     private readonly transform: TransformDto<UsuarioEntity, ResponseUsuarioDto>,
@@ -83,10 +88,18 @@ export class UsuarioService {
     const user = await this.usuarioRepository.obtenerPorId(id);
 
     if (!user) {
+      this.logger.warn(
+        `No se ha encontrado un usuario con el id: ${id} en nuestra base de datos`,
+      );
       throw new NotFoundException('Usuario no encontrado');
     }
 
-    if (!user.active) throw new BadRequestException('Usuario no activo');
+    if (!user.active) {
+      this.logger.warn(
+        `El usuario con el id: ${id} no esta activo en nuestra base de datos`,
+      );
+      throw new BadRequestException('Usuario no activo');
+    }
 
     return this.transform.transformDtoObject(user, ResponseUsuarioDto);
   }
