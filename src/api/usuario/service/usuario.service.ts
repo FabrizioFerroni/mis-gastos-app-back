@@ -19,7 +19,7 @@ import { plainToInstance } from 'class-transformer';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { EditarUsuarioDto } from '../dto/update.user';
-import { configApp } from '@/config/app/config.app';
+import { getSecretByName } from '@/core/functions/infisical';
 
 @Injectable()
 export class UsuarioService {
@@ -79,7 +79,9 @@ export class UsuarioService {
     if (userCache)
       return this.transform.transformDtoArray(userCache, ResponseUsuarioDto);
 
-    await this.cacheManager.set(key, users, configApp().redis.ttl);
+    const ttl = Number(await getSecretByName('THROTTLE_TTL'));
+
+    await this.cacheManager.set(key, users, ttl);
 
     return users;
   }

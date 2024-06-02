@@ -8,11 +8,15 @@ import { UsuarioEntity } from '@/api/usuario/entity/usuario.entity';
 export abstract class CuentaInterfaceRepository extends BaseAbstractRepository<CuentaEntity> {
   abstract guardar(data: CuentaEntity): Promise<CuentaEntity>;
   abstract obtenerTodos(skip?: number, take?: number): Promise<CuentaEntity[]>;
+  abstract obtenerTodosAndCount(
+    skip?: number,
+    take?: number,
+  ): Promise<[CuentaEntity[], number]>;
   abstract obtenerTodosPorUsuario(
     usuario: UsuarioEntity,
     skip?: number,
     take?: number,
-  ): Promise<CuentaEntity[]>;
+  ): Promise<[CuentaEntity[], number]>;
   abstract obtenerPorId(id: string): Promise<CuentaEntity>;
   abstract borrar(id: string): Promise<UpdateResult>;
   abstract actualizar(id: string, data: CuentaEntity): Promise<UpdateResult>;

@@ -4,6 +4,7 @@ import { Module } from '@nestjs/common';
 import { UsuarioEntity } from '@/api/usuario/entity/usuario.entity';
 import { ConfigModule } from '@nestjs/config';
 import { CuentaEntity } from '@/api/cuentas/entity/cuenta.entity';
+import { getSecretByName } from '@/core/functions/infisical';
 
 @Module({
   imports: [
@@ -12,16 +13,26 @@ import { CuentaEntity } from '@/api/cuentas/entity/cuenta.entity';
       load: [configApp],
       envFilePath: ['.env'],
     }),
-    TypeOrmModule.forRoot({
-      type: 'mysql',
-      host: configApp().database.host,
-      port: configApp().database.port,
-      username: configApp().database.username,
-      password: configApp().database.password,
-      database: configApp().database.database,
-      entities: [UsuarioEntity, CuentaEntity],
-      synchronize: true,
-      verboseRetryLog: true,
+    // DATABASE_TYPE
+
+    TypeOrmModule.forRootAsync({
+      useFactory: async () => ({
+        type: 'mysql',
+        host: await getSecretByName('DATABASE_HOST'),
+        port: +(await getSecretByName('DATABASE_PORT')),
+        username: await getSecretByName('DATABASE_USER'),
+        password: await getSecretByName('DATABASE_PASSWORD'),
+        database: await getSecretByName('DATABASE_BASEDATOS'),
+        entities: [UsuarioEntity, CuentaEntity],
+        synchronize:
+          (await getSecretByName('API_ENV')) === 'development' ? true : false,
+        verboseRetryLog: true,
+        logging:
+          (await getSecretByName('API_ENV')) === 'development'
+            ? 'all'
+            : ['error', 'warn', 'schema'],
+        logger: 'advanced-console',
+      }),
     }),
   ],
 })

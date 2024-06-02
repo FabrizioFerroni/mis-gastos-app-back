@@ -1,3 +1,4 @@
+import { PaginationMeta } from './../../../core/interfaces/pagination-meta.interface';
 import {
   CuentaErrorMensaje,
   CuentaMensaje,
@@ -15,17 +16,19 @@ import { CuentaEntity } from '../entity/cuenta.entity';
 import { ResponseCuentaDto } from '../dto/response/response.cuenta.dto';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
-import { configApp } from '@/config/app/config.app';
 import { AgregarCuentaDto } from '../dto/create.cuenta.dto';
 import { plainToInstance } from 'class-transformer';
 import { UsuarioService } from '@/api/usuario/service/usuario.service';
 import { EditarCuentaDto } from '../dto/update.cuenta.dto';
+import { PaginationDto } from '@/shared/utils/dtos/pagination.dto';
+import { PaginationService } from '@/core/services/pagination.service';
+import { DefaultPageSize } from '@/shared/utils/constants/querying';
 
+const KEY: string = 'cuentas';
+const KEY_USER: string = 'cuentas_usuario';
 @Injectable()
 export class CuentaService {
   private readonly logger = new Logger(CuentaService.name, { timestamp: true });
-
-  // TODO: cuando se hace una creacion, actualizacion, borrado y restaurado de cuenta hay que actualizar el cache para que traiga los datos correctamente.
 
   constructor(
     @Inject(CuentaInterfaceRepository)
@@ -34,47 +37,90 @@ export class CuentaService {
     private readonly transform: TransformDto<CuentaEntity, ResponseCuentaDto>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private readonly usuarioServicio: UsuarioService,
+    private readonly paginationService: PaginationService,
   ) {}
 
-  async findAll(skip?: number, take?: number) {
-    const key: string = 'cuentas';
-    const cuentasCache: CuentaEntity[] = await this.cacheManager.get(key);
-    const resp: CuentaEntity[] = await this.cuentaRepository.obtenerTodos(
+  async findAll(param: PaginationDto) {
+    const { page, limit } = param;
+
+    const take = limit ?? DefaultPageSize.ACCOUNT;
+    const skip = this.paginationService.calculateOffset(limit, page);
+
+    const cacheKey = `${KEY}-${page}-${limit}`;
+
+    const cuentasCache = await this.cacheManager.get<{
+      cuentas: CuentaEntity[];
+      meta: PaginationMeta;
+    }>(cacheKey);
+
+    const [data, count] = await this.cuentaRepository.obtenerTodosAndCount(
       skip,
       take,
     );
 
     const cuentas: CuentaEntity[] = this.transform.transformDtoArray(
-      resp,
+      data,
       ResponseCuentaDto,
     );
 
-    if (cuentasCache)
-      return this.transform.transformDtoArray(cuentasCache, ResponseCuentaDto);
+    const meta = this.paginationService.createMeta(limit, page, count);
 
-    await this.cacheManager.set(key, cuentas, configApp().redis.ttl);
+    if (cuentasCache) {
+      const respCuenta = this.transform.transformDtoArray(
+        cuentasCache.cuentas,
+        ResponseCuentaDto,
+      );
 
-    return cuentas;
+      return { cuentas: respCuenta, meta: cuentasCache.meta };
+    }
+
+    const response = { cuentas, meta };
+    await this.cacheManager.set(cacheKey, response);
+
+    return response;
   }
 
-  async findAllByUser(usuario_id: string, skip?: number, take?: number) {
+  async findAllByUser(usuario_id: string, param: PaginationDto) {
+    const { page, limit } = param;
+
+    const take = limit ?? DefaultPageSize.ACCOUNT;
+    const skip = this.paginationService.calculateOffset(limit, page);
+
+    const cacheKey = `${KEY_USER}-${page}-${limit}`;
+
     const usuario = await this.usuarioServicio.findOne(usuario_id);
-    const key: string = 'cuentas_usuario';
-    const cuentasCache: CuentaEntity[] = await this.cacheManager.get(key);
-    const resp: CuentaEntity[] =
-      await this.cuentaRepository.obtenerTodosPorUsuario(usuario, skip, take);
+
+    const cuentasCache = await this.cacheManager.get<{
+      cuentas: CuentaEntity[];
+      meta: PaginationMeta;
+    }>(cacheKey);
+
+    const [data, count] = await this.cuentaRepository.obtenerTodosPorUsuario(
+      usuario,
+      skip,
+      take,
+    );
 
     const cuentas: CuentaEntity[] = this.transform.transformDtoArray(
-      resp,
+      data,
       ResponseCuentaDto,
     );
 
-    if (cuentasCache)
-      return this.transform.transformDtoArray(cuentasCache, ResponseCuentaDto);
+    const meta = this.paginationService.createMeta(limit, page, count);
 
-    await this.cacheManager.set(key, cuentas, configApp().redis.ttl);
+    if (cuentasCache) {
+      const respCuenta = this.transform.transformDtoArray(
+        cuentasCache.cuentas,
+        ResponseCuentaDto,
+      );
 
-    return cuentas;
+      return { cuentas: respCuenta, meta: cuentasCache.meta };
+    }
+
+    const response = { cuentas, meta };
+    await this.cacheManager.set(cacheKey, response);
+
+    return response;
   }
 
   async getById(id: string) {
@@ -124,6 +170,8 @@ export class CuentaService {
       throw new BadRequestException(CuentaErrorMensaje.ACCOUNT_NOT_SAVED);
     }
 
+    this.invalidateAllCacheKeys();
+
     return CuentaMensaje.ACCOUNT_OK;
   }
 
@@ -155,6 +203,8 @@ export class CuentaService {
       return CuentaErrorMensaje.ACCOUNT_NOT_SAVED;
     }
 
+    this.invalidateAllCacheKeys();
+
     return CuentaMensaje.ACCOUNT_UPDATED;
   }
 
@@ -170,6 +220,8 @@ export class CuentaService {
       throw new BadRequestException(CuentaErrorMensaje.ACCOUNT_NOT_DELETED);
     }
 
+    this.invalidateAllCacheKeys();
+
     return CuentaMensaje.ACCOUNT_DELETED;
   }
 
@@ -184,6 +236,8 @@ export class CuentaService {
     if (!restore.affected) {
       throw new BadRequestException(CuentaErrorMensaje.ACCOUNT_NOT_RESTORED);
     }
+
+    this.invalidateAllCacheKeys();
 
     return CuentaMensaje.ACCOUNT_RESTORED;
   }
@@ -208,6 +262,19 @@ export class CuentaService {
       throw new BadRequestException(
         CuentaErrorMensaje.ACCOUNT_NRO_CUENTA_EXIST,
       );
+    }
+  }
+
+  async invalidateAllCacheKeys() {
+    const keys = await this.cacheManager.store.keys(`${KEY}-*`);
+    const keys_user = await this.cacheManager.store.keys(`${KEY_USER}-*`);
+
+    for (const key of keys) {
+      await this.cacheManager.del(key);
+    }
+
+    for (const key of keys_user) {
+      await this.cacheManager.del(key);
     }
   }
 }
