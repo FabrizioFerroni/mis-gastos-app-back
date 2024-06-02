@@ -1,10 +1,11 @@
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { configApp } from '../app/config.app';
-import { Module } from '@nestjs/common';
+import { Logger as NestLogger, Module } from '@nestjs/common';
 import { UsuarioEntity } from '@/api/usuario/entity/usuario.entity';
 import { ConfigModule } from '@nestjs/config';
 import { CuentaEntity } from '@/api/cuentas/entity/cuenta.entity';
 import { getSecretByName } from '@/core/functions/infisical';
+import BDFileLogs from './logger/BDFileLog';
 
 @Module({
   imports: [
@@ -14,7 +15,6 @@ import { getSecretByName } from '@/core/functions/infisical';
       envFilePath: ['.env'],
     }),
     // DATABASE_TYPE
-
     TypeOrmModule.forRootAsync({
       useFactory: async () => ({
         type: 'mysql',
@@ -31,7 +31,7 @@ import { getSecretByName } from '@/core/functions/infisical';
           (await getSecretByName('API_ENV')) === 'development'
             ? 'all'
             : ['error', 'warn', 'schema'],
-        logger: 'advanced-console',
+        logger: new BDFileLogs(new NestLogger()),
       }),
     }),
   ],
