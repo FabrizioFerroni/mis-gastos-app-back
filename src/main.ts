@@ -14,7 +14,6 @@ async function bootstrap() {
   const hostallowedHeaders = await getSecretByName('HOST_ALLOWED_HEADERS');
   const hostCredentials = Boolean(await getSecretByName('HOST_CREDENTIALS'));
   const entorno = await getSecretByName('API_ENV');
-
   const apiPort = await getSecretByName('API_PORT');
 
   app.enableCors({
