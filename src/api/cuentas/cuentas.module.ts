@@ -7,9 +7,14 @@ import { CuentaInterfaceRepository } from './repository/cuenta.interface.reposit
 import { CuentaService } from './service/cuenta.service';
 import { CuentaController } from './controller/cuenta.controller';
 import { UsuarioModule } from '../usuario/usuario.module';
+import { CoreModule } from '@/core/core.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([CuentaEntity]), UsuarioModule],
+  imports: [
+    TypeOrmModule.forFeature([CuentaEntity]),
+    UsuarioModule,
+    CoreModule,
+  ],
   controllers: [CuentaController],
   providers: [
     CuentaService,

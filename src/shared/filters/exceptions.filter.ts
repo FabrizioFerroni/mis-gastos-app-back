@@ -17,6 +17,7 @@ export class CustomExceptionFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse();
     const request = ctx.getRequest();
+    const entorno = process.env.NODE_ENV;
 
     if (exception instanceof HttpException) {
       const status = exception.getStatus();
@@ -26,7 +27,7 @@ export class CustomExceptionFilter implements ExceptionFilter {
         request.url === ApiRoutes.BASE_PATH &&
         status === HttpStatus.NOT_FOUND
       ) {
-        return response.redirect('/api');
+        return response.redirect('/');
       }
 
       const message =
@@ -49,8 +50,7 @@ export class CustomExceptionFilter implements ExceptionFilter {
       return response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
         status_code: HttpStatus.INTERNAL_SERVER_ERROR,
         message: MessagesError.INTERNAL_EXCEPTION,
-        messageServer:
-          process.env.NODE_ENV === 'development' ? exception : null,
+        messageServer: entorno === 'dev' ? exception : null,
         timestamp: new Date().toISOString(),
         path: request.url,
       });

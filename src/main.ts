@@ -1,23 +1,20 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ConfigService } from '@nestjs/config';
 import { ValidationPipe } from '@nestjs/common';
 import { CustomExceptionFilter } from './shared/filters/exceptions.filter';
 import { configStrings } from './config/app/config.strings';
 import { setupSwagger } from './config/swagger/config.swagger.app';
+import { getSecretByName } from './core/functions/infisical';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  const configService = app.get(ConfigService);
 
-  const hostCors = configService.get<string[]>('FRONT_HOST');
-  const hostMethods = configService.get<string[]>('HOST_METHODS');
-  const hostallowedHeaders = configService.get<string[]>(
-    'HOST_ALLOWED_HEADERS',
-  );
-  const hostCredentials = configService.get<boolean>('HOST_CREDENTIALS');
-
-  const apiPort = configService.get<number>('API_PORT');
+  const hostCors = await getSecretByName('FRONT_HOST');
+  const hostMethods = await getSecretByName('HOST_METHODS');
+  const hostallowedHeaders = await getSecretByName('HOST_ALLOWED_HEADERS');
+  const hostCredentials = Boolean(await getSecretByName('HOST_CREDENTIALS'));
+  const entorno = await getSecretByName('API_ENV');
+  const apiPort = await getSecretByName('API_PORT');
 
   app.enableCors({
     origin: hostCors,
@@ -36,10 +33,13 @@ async function bootstrap() {
       validationError: {
         target: false,
       },
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
     }),
   );
   app.setGlobalPrefix(configStrings().apiVersion, { exclude: ['estado'] });
-  setupSwagger(app, configService);
+  setupSwagger(app, entorno);
 
   await app.listen(apiPort);
 }

@@ -11,11 +11,10 @@ import {
   Query,
 } from '@nestjs/common';
 import { CuentaService } from '../service/cuenta.service';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { Throttle } from '@nestjs/throttler';
-import { configApp } from '@/config/app/config.app';
+import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { AgregarCuentaDto } from '../dto/create.cuenta.dto';
 import { EditarCuentaDto } from '../dto/update.cuenta.dto';
+import { PaginationDto } from '@/shared/utils/dtos/pagination.dto';
 
 @Controller('cuentas')
 @ApiTags('Cuentas')
@@ -24,22 +23,20 @@ export class CuentaController {
 
   @Get()
   @ApiOperation({ summary: 'Obtiene todos las cuentas de los usuarios' })
-  @Throttle({ default: { limit: configApp().limit, ttl: configApp().ttl } })
-  findAll(@Query('page') skip: number = 1, @Query('limit') take: number = 10) {
-    return this.cuentaService.findAll(skip, take);
+  @ApiQuery({ name: 'page', type: 'number' })
+  @ApiQuery({ name: 'limit', type: 'number' })
+  findAll(@Query() pagination: PaginationDto) {
+    return this.cuentaService.findAll(pagination);
   }
 
   @Get('usuario/:id')
   @ApiOperation({
     summary: 'Obtiene todas las cuentas del usuario que se busco por id',
   })
-  @Throttle({ default: { limit: configApp().limit, ttl: configApp().ttl } })
-  findAllByUser(
-    @Param('id') id: string,
-    @Query('page') skip: number = 1,
-    @Query('limit') take: number = 10,
-  ) {
-    return this.cuentaService.findAllByUser(id, skip, take);
+  @ApiQuery({ name: 'page', type: 'number' })
+  @ApiQuery({ name: 'limit', type: 'number' })
+  findAllByUser(@Param('id') id: string, @Query() pagination: PaginationDto) {
+    return this.cuentaService.findAllByUser(id, pagination);
   }
 
   @Get(':id')
@@ -50,14 +47,12 @@ export class CuentaController {
 
   @Post()
   @ApiOperation({ summary: 'Agregar una nueva cuenta' })
-  @Throttle({ default: { limit: configApp().limit, ttl: configApp().ttl } })
   async create(@Body() dto: AgregarCuentaDto) {
     return await this.cuentaService.create(dto);
   }
 
   @Put(':id')
   @ApiOperation({ summary: 'Editar una cuenta' })
-  @Throttle({ default: { limit: configApp().limit, ttl: configApp().ttl } })
   async update(@Param('id') id: string, @Body() dto: EditarCuentaDto) {
     return await this.cuentaService.update(id, dto);
   }

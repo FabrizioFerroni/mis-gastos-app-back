@@ -1,15 +1,10 @@
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import { ConfigService } from '@nestjs/config';
 import { INestApplication } from '@nestjs/common';
 import { join } from 'path';
 import { Request, Response } from 'express';
 import * as express from 'express';
 
-export const setupSwagger = (
-  app: INestApplication,
-  configService: ConfigService,
-) => {
-  const entorno = configService.get<string>('NODE_ENV');
+export const setupSwagger = (app: INestApplication, entorno: string) => {
   if (entorno === 'production') {
     const swaggerPath = join(__dirname, '..', 'node_modules/swagger-ui-dist');
     app.use('/swagger-ui', express.static(swaggerPath));

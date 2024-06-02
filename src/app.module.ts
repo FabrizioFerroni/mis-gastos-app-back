@@ -1,5 +1,5 @@
 import { ClassSerializerInterceptor, Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { configApp } from './config/app/config.app';
@@ -12,6 +12,7 @@ import { ResponseInterceptor } from './shared/intenceptors/response.interceptor'
 import { DatabaseModule } from './config/database/database.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import { redisStore } from 'cache-manager-redis-yet';
+import { getSecretByName } from './core/functions/infisical';
 
 @Module({
   imports: [
@@ -26,23 +27,40 @@ import { redisStore } from 'cache-manager-redis-yet';
       useFactory: async () => ({
         store: await redisStore({
           socket: {
-            host: configApp().redis.host,
-            port: configApp().redis.port,
+            host: await getSecretByName('REDIS_HOST'),
+            port: +(await getSecretByName('REDIS_PORT')),
           },
+          username: await getSecretByName('REDIS_USER'),
+          password: await getSecretByName('REDIS_PASS'),
+          ttl: +(await getSecretByName('REDIS_TTL')) * 1000,
         }),
       }),
     }),
 
-    ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'swagger-static'),
-      serveRoot: process.env.NODE_ENV === 'development' ? '/' : '/swagger',
+    ServeStaticModule.forRootAsync({
+      isGlobal: true,
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async () => [
+        {
+          rootPath: join(__dirname, '..', 'swagger-static'),
+          serveRoot:
+            (await getSecretByName('API_ENV')) === 'development'
+              ? '/'
+              : '/swagger',
+        },
+      ],
     }),
-    ThrottlerModule.forRoot([
-      {
-        ttl: configApp().ttl,
-        limit: configApp().limit,
-      },
-    ]),
+
+    ThrottlerModule.forRootAsync({
+      useFactory: async () => [
+        {
+          ttl: +(await getSecretByName('THROTTLE_TTL')),
+          limit: +(await getSecretByName('THROTTLE_LIMIT')),
+        },
+      ],
+    }),
+
     CoreModule,
     ApiModule,
     DatabaseModule,

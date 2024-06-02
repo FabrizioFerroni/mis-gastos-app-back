@@ -1,11 +1,15 @@
-import { IsInt, Min } from 'class-validator';
+import { IsOptional, Max } from 'class-validator';
+import { MAX_PAGE_NUMBER, MAX_PAGE_SIZE } from '../constants/querying';
+import { IsCardinal } from '@/shared/decorators/validators/is-cardinal.decorator';
 
 export class PaginationDto {
-  @IsInt()
-  @Min(1)
-  page: number;
+  @IsOptional()
+  @Max(MAX_PAGE_NUMBER)
+  @IsCardinal()
+  readonly page?: number = 1;
 
-  @IsInt()
-  @Min(1)
-  limit: number;
+  @IsOptional()
+  @Max(MAX_PAGE_SIZE)
+  @IsCardinal()
+  readonly limit?: number = 10;
 }

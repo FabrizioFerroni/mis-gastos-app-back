@@ -70,6 +70,12 @@ export abstract class BaseAbstractRepository<T extends HasId>
     return await this.entity.find(options);
   }
 
+  public async findAndCount(
+    options?: FindManyOptions<T>,
+  ): Promise<[T[], number]> {
+    return await this.entity.findAndCount(options);
+  }
+
   public async findBorrado(options?: FindOptionsWhere<T>): Promise<T> {
     return await this.entity.findOneBy(options);
   }
