@@ -28,7 +28,6 @@
     "test:e2e": "jest --config ./test/jest-e2e.json --detectOpenHandles --no-cache --forceExit"
   },
   "dependencies": {
-    "@infisical/sdk": "^2.2.3",
     "@nestjs/cache-manager": "^2.2.2",
     "@nestjs/common": "^10.0.0",
     "@nestjs/config": "^3.2.2",
