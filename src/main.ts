@@ -4,17 +4,17 @@ import { ValidationPipe } from '@nestjs/common';
 import { CustomExceptionFilter } from './shared/filters/exceptions.filter';
 import { configStrings } from './config/app/config.strings';
 import { setupSwagger } from './config/swagger/config.swagger.app';
-import { getSecretByName } from './core/functions/infisical';
+import { configApp } from './config/app/config.app';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  const hostCors = await getSecretByName('FRONT_HOST');
-  const hostMethods = await getSecretByName('HOST_METHODS');
-  const hostallowedHeaders = await getSecretByName('HOST_ALLOWED_HEADERS');
-  const hostCredentials = Boolean(await getSecretByName('HOST_CREDENTIALS'));
-  const entorno = await getSecretByName('API_ENV');
-  const apiPort = await getSecretByName('API_PORT');
+  const hostCors = configApp().frontHost;
+  const hostMethods = configApp().hostMethod;
+  const hostallowedHeaders = configApp().hostAllowedHeader;
+  const hostCredentials = configApp().hostCredentials;
+  const entorno = configApp().env;
+  const apiPort = configApp().apiPort;
 
   app.enableCors({
     origin: hostCors,

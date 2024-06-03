@@ -12,7 +12,6 @@ import { ResponseInterceptor } from './shared/intenceptors/response.interceptor'
 import { DatabaseModule } from './config/database/database.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import { redisStore } from 'cache-manager-redis-yet';
-import { getSecretByName } from './core/functions/infisical';
 
 @Module({
   imports: [
@@ -27,12 +26,12 @@ import { getSecretByName } from './core/functions/infisical';
       useFactory: async () => ({
         store: await redisStore({
           socket: {
-            host: await getSecretByName('REDIS_HOST'),
-            port: +(await getSecretByName('REDIS_PORT')),
+            host: configApp().redis.host,
+            port: configApp().redis.port,
           },
-          username: await getSecretByName('REDIS_USER'),
-          password: await getSecretByName('REDIS_PASS'),
-          ttl: +(await getSecretByName('REDIS_TTL')) * 1000,
+          username: configApp().redis.username,
+          password: configApp().redis.password,
+          ttl: configApp().redis.ttl * 1000,
         }),
       }),
     }),
@@ -44,10 +43,7 @@ import { getSecretByName } from './core/functions/infisical';
       useFactory: async () => [
         {
           rootPath: join(__dirname, '..', 'swagger-static'),
-          serveRoot:
-            (await getSecretByName('API_ENV')) === 'development'
-              ? '/'
-              : '/swagger',
+          serveRoot: configApp().env === 'development' ? '/' : '/swagger',
         },
       ],
     }),
@@ -55,8 +51,8 @@ import { getSecretByName } from './core/functions/infisical';
     ThrottlerModule.forRootAsync({
       useFactory: async () => [
         {
-          ttl: +(await getSecretByName('THROTTLE_TTL')),
-          limit: +(await getSecretByName('THROTTLE_LIMIT')),
+          ttl: configApp().ttl,
+          limit: configApp().limit,
         },
       ],
     }),
