@@ -16,7 +16,7 @@ describe('StatusController (e2e)', () => {
     await app.init();
   });
 
-  it('/api/estado (GET)', () => {
+  it('/estado (GET)', () => {
     const mockResponse = {
       message: 'Solicitud éxitosa',
       data: {
