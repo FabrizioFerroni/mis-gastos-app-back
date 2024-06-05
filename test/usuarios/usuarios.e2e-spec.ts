@@ -89,6 +89,6 @@ describe('UsuarioController (e2e)', () => {
 
   it('/api/usuarios/{id} (400, DELETE)', () => {
     const id = '84357329-eacd-489a-ac9e-7357df8d26ba';
-    return request(app.getHttpServer()).delete(`/usuarios/${id}`).expect(200);
+    return request(app.getHttpServer()).delete(`/usuarios/${id}`).expect(400);
   });
 });
