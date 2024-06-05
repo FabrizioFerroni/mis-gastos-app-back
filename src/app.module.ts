@@ -17,8 +17,8 @@ import { redisStore } from 'cache-manager-redis-yet';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      envFilePath: [`${process.cwd()}/.env.${process.env.NODE_ENV}.local`],
       load: [configApp],
-      envFilePath: ['.env'],
     }),
 
     CacheModule.registerAsync({

@@ -7,8 +7,8 @@ import { PaginationService } from './services/pagination.service';
   imports: [
     ConfigModule.forRoot({
       isGlobal: false,
+      envFilePath: [`${process.cwd()}/.env.${process.env.NODE_ENV}.local`],
       load: [configApp],
-      envFilePath: ['.env'],
     }),
   ],
   providers: [PaginationService],

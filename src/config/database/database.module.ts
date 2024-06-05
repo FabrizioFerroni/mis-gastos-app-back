@@ -10,8 +10,8 @@ import BDFileLogs from './logger/BDFileLog';
   imports: [
     ConfigModule.forRoot({
       isGlobal: false,
+      envFilePath: [`${process.cwd()}/.env.${process.env.NODE_ENV}.local`],
       load: [configApp],
-      envFilePath: ['.env'],
     }),
     // DATABASE_TYPE
     TypeOrmModule.forRootAsync({
@@ -23,7 +23,12 @@ import BDFileLogs from './logger/BDFileLog';
         password: configApp().database.password,
         database: configApp().database.database,
         entities: [UsuarioEntity, CuentaEntity],
-        synchronize: configApp().env === 'development' ? true : false,
+        synchronize:
+          configApp().env === 'development'
+            ? true
+            : configApp().env === 'test'
+              ? true
+              : false,
         verboseRetryLog: true,
         logging:
           configApp().env === 'development'
