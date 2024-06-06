@@ -93,39 +93,43 @@ export class CuentaRepository
     return await this.findWithRelations(options);
   }
 
-  async cuentaYaExiste(nombre: string, id?: string): Promise<boolean> {
-    let result: CuentaEntity;
+  async cuentaYaExiste(
+    nombre: string,
+    id?: string,
+    usuario?: UsuarioEntity,
+  ): Promise<boolean> {
+    const options: any = {
+      where: {
+        nombre: nombre,
+        usuario: { id: usuario.id },
+      },
+      relations: ['usuario'],
+    };
 
-    if (!id) {
-      const options = {
-        where: {
-          nombre: String(nombre),
-        },
-      };
-
-      result = await this.findByCondition(options);
-    } else {
-      const options = {
-        where: {
-          nombre: String(nombre),
-          id: Not(id),
-        },
-      };
-
-      result = await this.findByCondition(options);
+    if (id) {
+      options.where.id = Not(id);
     }
 
+    const result = await this.findByCondition(options);
     return !!result;
   }
 
-  async nroCuentaYaExiste(nroCuenta: string, id?: string): Promise<boolean> {
+  async nroCuentaYaExiste(
+    nroCuenta: string,
+    id?: string,
+    usuario?: UsuarioEntity,
+  ): Promise<boolean> {
     let result: CuentaEntity;
 
     if (!id) {
       const options = {
         where: {
           nroCuenta: String(nroCuenta),
+          usuario: {
+            id: usuario.id,
+          },
         },
+        relations: ['usuario'],
       };
 
       result = await this.findByCondition(options);

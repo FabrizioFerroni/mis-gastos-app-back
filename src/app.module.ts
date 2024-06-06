@@ -12,6 +12,7 @@ import { ResponseInterceptor } from './shared/intenceptors/response.interceptor'
 import { DatabaseModule } from './config/database/database.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import { redisStore } from 'cache-manager-redis-yet';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
@@ -19,6 +20,12 @@ import { redisStore } from 'cache-manager-redis-yet';
       isGlobal: true,
       envFilePath: [`${process.cwd()}/.env.${process.env.NODE_ENV}.local`],
       load: [configApp],
+    }),
+
+    EventEmitterModule.forRoot({
+      verboseMemoryLeak: true,
+      maxListeners: 1,
+      ignoreErrors: false,
     }),
 
     CacheModule.registerAsync({

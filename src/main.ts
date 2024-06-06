@@ -25,6 +25,11 @@ async function bootstrap() {
 
   app.useGlobalFilters(new CustomExceptionFilter());
 
+  app.use((req, res, next) => {
+    res.removeHeader('X-Powered-By');
+    next();
+  });
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

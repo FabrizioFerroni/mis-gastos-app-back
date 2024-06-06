@@ -22,21 +22,14 @@ export class CuentaController {
   constructor(private readonly cuentaService: CuentaService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Obtiene todos las cuentas de los usuarios' })
-  @ApiQuery({ name: 'page', type: 'number' })
-  @ApiQuery({ name: 'limit', type: 'number' })
-  findAll(@Query() pagination: PaginationDto) {
-    return this.cuentaService.findAll(pagination);
-  }
-
-  @Get('usuario/:id')
   @ApiOperation({
-    summary: 'Obtiene todas las cuentas del usuario que se busco por id',
+    summary: 'Obtiene todas las cuentas del usuario',
   })
   @ApiQuery({ name: 'page', type: 'number' })
   @ApiQuery({ name: 'limit', type: 'number' })
-  findAllByUser(@Param('id') id: string, @Query() pagination: PaginationDto) {
-    return this.cuentaService.findAllByUser(id, pagination);
+  findAllByUser(@Query() pagination: PaginationDto) {
+    const usuario_id = '1e785ed5-fe90-404a-b08f-a85e07895a27'; //TODO: Cambiar cuando este hecho el modulo de auth con el id que viene del token
+    return this.cuentaService.findAllByUser(usuario_id, pagination);
   }
 
   @Get(':id')

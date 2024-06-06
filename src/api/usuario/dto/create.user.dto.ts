@@ -49,4 +49,16 @@ export class AgregarUsuarioDto {
   @ApiProperty()
   @PasswordVerify('password')
   confirm_password: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(3)
+  @ApiProperty()
+  pais: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(3)
+  @ApiProperty()
+  localizacion: string;
 }

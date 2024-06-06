@@ -9,5 +9,6 @@
   "moduleNameMapper": {
     "^@/(.*)$": "<rootDir>/../src/$1",
     "^@utils/(.*)$": "<rootDir>/../src/shared/utils/$1"
-  }
+  },
+  "verbose": true
 }

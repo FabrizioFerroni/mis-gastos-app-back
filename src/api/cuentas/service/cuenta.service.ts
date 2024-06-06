@@ -23,6 +23,7 @@ import { EditarCuentaDto } from '../dto/update.cuenta.dto';
 import { PaginationDto } from '@/shared/utils/dtos/pagination.dto';
 import { PaginationService } from '@/core/services/pagination.service';
 import { DefaultPageSize } from '@/shared/utils/constants/querying';
+import { OnEvent } from '@nestjs/event-emitter';
 
 const KEY: string = 'cuentas';
 const KEY_USER: string = 'cuentas_usuario';
@@ -36,6 +37,7 @@ export class CuentaService {
     @Inject(TransformDto)
     private readonly transform: TransformDto<CuentaEntity, ResponseCuentaDto>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    @Inject(UsuarioService)
     private readonly usuarioServicio: UsuarioService,
     private readonly paginationService: PaginationService,
   ) {}
@@ -136,6 +138,7 @@ export class CuentaService {
     return this.transform.transformDtoObject(cuenta, ResponseCuentaDto);
   }
 
+  @OnEvent('user.created')
   async create(dto: AgregarCuentaDto) {
     const {
       nombre,
@@ -148,8 +151,9 @@ export class CuentaService {
       usuario_id,
     } = dto;
 
-    await this.validateNombreBD(nombre);
-    await this.validateNroCuentaBD(nro_cuenta);
+    await this.validateNombreBD(nombre, null, usuario_id);
+    if (dto.nro_cuenta !== null)
+      await this.validateNroCuentaBD(nro_cuenta, null, usuario_id);
 
     const newAccount = {
       nombre,
@@ -183,8 +187,8 @@ export class CuentaService {
     if (!cuenta)
       throw new NotFoundException(CuentaErrorMensaje.ACCOUNT_NOT_FOUND);
 
-    await this.validateNombreBD(nombre, id);
-    await this.validateNroCuentaBD(nro_cuenta, id);
+    await this.validateNombreBD(nombre, id, dto.usuario_id);
+    await this.validateNroCuentaBD(nro_cuenta, id, dto.usuario_id);
 
     const cuentaToUpdate: Partial<CuentaEntity> = {};
 
@@ -193,6 +197,9 @@ export class CuentaService {
         cuentaToUpdate[key] = dto[key];
       }
     }
+
+    // TODO: Ver como editar usuario
+    delete cuentaToUpdate['usuario_id'];
 
     const cuentaUpdated = await this.cuentaRepository.actualizar(
       id,
@@ -243,8 +250,14 @@ export class CuentaService {
   }
 
   // validations
-  async validateNombreBD(nombre: string, id?: string) {
-    const existInBD = await this.cuentaRepository.cuentaYaExiste(nombre, id);
+  async validateNombreBD(nombre: string, id?: string, usuario_id?: string) {
+    const usuario = await this.usuarioServicio.findOneNewUser(usuario_id);
+
+    const existInBD = await this.cuentaRepository.cuentaYaExiste(
+      nombre,
+      id,
+      usuario,
+    );
 
     if (existInBD) {
       this.logger.error(CuentaErrorMensaje.ACCOUNT_NOMBRE_EXIST);
@@ -252,10 +265,16 @@ export class CuentaService {
     }
   }
 
-  async validateNroCuentaBD(nroCuenta: string, id?: string) {
+  async validateNroCuentaBD(
+    nroCuenta: string,
+    id?: string,
+    usuario_id?: string,
+  ) {
+    const usuario = await this.usuarioServicio.findOneNewUser(usuario_id);
     const existInBD = await this.cuentaRepository.nroCuentaYaExiste(
       nroCuenta,
       id,
+      usuario,
     );
 
     if (existInBD) {
