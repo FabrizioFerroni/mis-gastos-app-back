@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Inject,
   Injectable,
+  InternalServerErrorException,
   Logger,
   NotFoundException,
 } from '@nestjs/common';
@@ -19,6 +20,11 @@ import { plainToInstance } from 'class-transformer';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { EditarUsuarioDto } from '../dto/update.user';
+import { getCurrency } from '@/shared/utils/functions/get-currencies';
+import { AgregarCuentaDto } from '@/api/cuentas/dto/create.cuenta.dto';
+import { TipoCuenta } from '@/api/cuentas/utils/cuentas.enum';
+import { UsuarioMensaje } from '../messages/usuario.message';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class UsuarioService {
@@ -32,10 +38,11 @@ export class UsuarioService {
     @Inject(TransformDto)
     private readonly transform: TransformDto<UsuarioEntity, ResponseUsuarioDto>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async create(dto: AgregarUsuarioDto) {
-    const { nombre, apellido, email } = dto;
+    const { nombre, apellido, email, pais, localizacion } = dto;
 
     if (dto.password) dto.password = await hashPassword(dto.password);
 
@@ -54,11 +61,28 @@ export class UsuarioService {
       active: false,
       token,
       expiration_token: nuevaFecha,
+      pais,
+      geoLocalizacion: localizacion,
     };
 
     const data: UsuarioEntity = plainToInstance(UsuarioEntity, newUser);
 
-    return await this.usuarioRepository.guardar(data);
+    const userNew = await this.usuarioRepository.guardar(data);
+
+    if (!userNew) {
+      throw new InternalServerErrorException(
+        UserMessagesError.INTERNAL_SERVER_ERROR,
+      );
+    }
+
+    const accountNew = this.createNewAccount(userNew);
+
+    if (!accountNew) {
+      await this.remove(userNew.id);
+      throw new InternalServerErrorException(UserMessagesError.USER_ERROR);
+    }
+
+    return UsuarioMensaje.USER_OK;
   }
 
   async findAll(deletedAt: boolean, skip?: number, take?: number) {
@@ -98,6 +122,19 @@ export class UsuarioService {
         `El usuario con el id: ${id} no esta activo en nuestra base de datos`,
       );
       throw new BadRequestException('Usuario no activo');
+    }
+
+    return this.transform.transformDtoObject(user, ResponseUsuarioDto);
+  }
+
+  async findOneNewUser(id: string) {
+    const user = await this.usuarioRepository.obtenerPorId(id);
+
+    if (!user) {
+      this.logger.warn(
+        `No se ha encontrado un usuario con el id: ${id} en nuestra base de datos`,
+      );
+      throw new NotFoundException('Usuario no encontrado');
     }
 
     return this.transform.transformDtoObject(user, ResponseUsuarioDto);
@@ -184,5 +221,22 @@ export class UsuarioService {
     if (existInBD) {
       throw new BadRequestException(UserMessagesError.USER_ALREADY_EXIST);
     }
+  }
+
+  createNewAccount(user: UsuarioEntity): boolean {
+    const { id, pais } = user;
+
+    const newAccount: AgregarCuentaDto = {
+      nombre: 'Billetera',
+      descripcion: 'Cuenta principal para los gastos',
+      saldo: 0,
+      icono: '💵',
+      moneda: getCurrency(pais),
+      tipo: TipoCuenta.EFECTIVO,
+      nro_cuenta: null,
+      usuario_id: id,
+    };
+
+    return this.eventEmitter.emit('user.created', newAccount);
   }
 }

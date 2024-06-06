@@ -23,8 +23,7 @@ import { CoreModule } from '@/core/core.module';
       useClass: CuentaRepository,
     },
     TransformDto,
-    CuentaService,
   ],
-  exports: [],
+  exports: [CuentaService],
 })
 export class CuentasModule {}

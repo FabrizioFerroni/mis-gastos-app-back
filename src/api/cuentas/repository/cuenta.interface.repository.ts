@@ -21,8 +21,16 @@ export abstract class CuentaInterfaceRepository extends BaseAbstractRepository<C
   abstract borrar(id: string): Promise<UpdateResult>;
   abstract actualizar(id: string, data: CuentaEntity): Promise<UpdateResult>;
   abstract obtenerRelaciones(): Promise<CuentaEntity[]>;
-  abstract cuentaYaExiste(nombre: string, id?: string): Promise<boolean>;
-  abstract nroCuentaYaExiste(nroCuenta: string, id?: string): Promise<boolean>;
+  abstract cuentaYaExiste(
+    nombre: string,
+    id?: string,
+    usuario?: UsuarioEntity,
+  ): Promise<boolean>;
+  abstract nroCuentaYaExiste(
+    nroCuenta: string,
+    id?: string,
+    usuario?: UsuarioEntity,
+  ): Promise<boolean>;
   abstract existeRegistro(id: string, deleted?: boolean): Promise<boolean>;
   abstract restaurar(id: string): Promise<UpdateResult>;
 }
