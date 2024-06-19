@@ -9,9 +9,10 @@ import { MovimientoRepository } from './repository/movimiento.repository';
 import { MovimientosService } from './service/movimientos.service';
 import { CuentasModule } from '../cuentas/cuentas.module';
 import { CategoriasModule } from '../categorias/categorias.module';
+import { MovimientosController } from './controller/movimientos.controller';
 
 @Module({
-  controllers: [],
+  controllers: [MovimientosController],
   imports: [
     TypeOrmModule.forFeature([MovimientoEntity]),
     UsuarioModule,

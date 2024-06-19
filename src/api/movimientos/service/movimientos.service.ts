@@ -162,6 +162,9 @@ export class MovimientosService {
       usuario_id,
     } = dto;
 
+    // TODO: Verificar si la cuenta y categoria pertenecen al usuario que registra un nuevo movimiento
+    // TODO: Dependiendo del tipo de ingreso restar saldo a la cuenta o sumar. ( Esto dependera del tipo de cuenta)
+    // TODO: Tambien verificar si el tipo es ingreso ponga una categoria de tipo ingreso, igual para egreso
     const newMovement = {
       tipo,
       estado,
