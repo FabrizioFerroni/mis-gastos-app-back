@@ -7,7 +7,7 @@ import {
   IsUUID,
   MinLength,
 } from 'class-validator';
-import { TipoCategoria } from '../utils/tipos.enum';
+import { Tipos } from '@/shared/utils/enums/tipos.enum';
 
 export class AgregarCategoriaDto {
   @IsString()
@@ -33,11 +33,11 @@ export class AgregarCategoriaDto {
   @ApiProperty()
   icono: string;
 
-  @IsEnum(TipoCategoria)
+  @IsEnum(Tipos)
   @MinLength(1)
   @IsNotEmpty()
   @ApiProperty()
-  tipo: TipoCategoria;
+  tipo: Tipos;
 
   @IsUUID()
   @IsOptional()

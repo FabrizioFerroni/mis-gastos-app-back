@@ -1,6 +1,6 @@
 import { UsuarioEntity } from '@/api/usuario/entity/usuario.entity';
 import { Exclude, Expose, Transform } from 'class-transformer';
-import { TipoCategoria } from '../../utils/tipos.enum';
+import { Tipos } from '@/shared/utils/enums/tipos.enum';
 
 export class ResponseCategoriaDto {
   @Expose({ name: 'id' })
@@ -20,7 +20,7 @@ export class ResponseCategoriaDto {
   icono: string;
 
   @Expose()
-  tipo: TipoCategoria;
+  tipo: Tipos;
 
   @Expose()
   usuario: UsuarioEntity;

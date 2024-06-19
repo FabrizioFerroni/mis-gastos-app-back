@@ -10,7 +10,7 @@ import {
   Unique,
   UpdateDateColumn,
 } from 'typeorm';
-import { TipoCategoria } from '../utils/tipos.enum';
+import { Tipos } from '@/shared/utils/enums/tipos.enum';
 
 @Entity({ name: 'categorias' })
 @Unique(['nombre'])
@@ -33,10 +33,10 @@ export class CategoriaEntity {
   @Column({
     nullable: true,
     type: 'enum',
-    enum: TipoCategoria,
-    default: TipoCategoria.EGRESO,
+    enum: Tipos,
+    default: Tipos.EGRESO,
   })
-  tipo: TipoCategoria;
+  tipo: Tipos;
 
   @ManyToOne(() => UsuarioEntity, {
     cascade: ['soft-remove'],
