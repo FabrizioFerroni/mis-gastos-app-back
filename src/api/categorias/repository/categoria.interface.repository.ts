@@ -13,6 +13,7 @@ export abstract class CategoriaInterfaceRepository extends BaseAbstractRepositor
     take?: number,
   ): Promise<[CategoriaEntity[], number]>;
   abstract obtenerPorId(id: string): Promise<CategoriaEntity>;
+  abstract obtenerPorIdRel(id: string): Promise<CategoriaEntity>;
   abstract borrar(id: string): Promise<UpdateResult>;
   abstract actualizar(id: string, data: CategoriaEntity): Promise<UpdateResult>;
   abstract obtenerRelaciones(): Promise<CategoriaEntity[]>;

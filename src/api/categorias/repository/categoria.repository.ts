@@ -41,6 +41,18 @@ export class CategoriaRepository
     return await this.findOneById(id);
   }
 
+  async obtenerPorIdRel(id: string): Promise<CategoriaEntity> {
+    const options = {
+      where: {
+        id: id,
+      },
+      relations: {
+        usuario: true,
+      },
+    };
+    return await this.findByCondition(options);
+  }
+
   async guardar(data: CategoriaEntity): Promise<CategoriaEntity> {
     const create: CategoriaEntity = this.create(data);
     const cuentaSaved: CategoriaEntity = await this.save(create);

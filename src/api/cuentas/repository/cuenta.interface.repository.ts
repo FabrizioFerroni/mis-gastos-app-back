@@ -18,6 +18,7 @@ export abstract class CuentaInterfaceRepository extends BaseAbstractRepository<C
     take?: number,
   ): Promise<[CuentaEntity[], number]>;
   abstract obtenerPorId(id: string): Promise<CuentaEntity>;
+  abstract obtenerPorIdRel(id: string): Promise<CuentaEntity>;
   abstract borrar(id: string): Promise<UpdateResult>;
   abstract actualizar(id: string, data: CuentaEntity): Promise<UpdateResult>;
   abstract obtenerRelaciones(): Promise<CuentaEntity[]>;

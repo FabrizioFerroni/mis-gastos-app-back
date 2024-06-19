@@ -1,8 +1,16 @@
-import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import {
+  SwaggerModule,
+  DocumentBuilder,
+  SwaggerCustomOptions,
+} from '@nestjs/swagger';
 import { INestApplication } from '@nestjs/common';
 import { join } from 'path';
 import { Request, Response } from 'express';
 import * as express from 'express';
+import { CategoriasModule } from '@/api/categorias/categorias.module';
+import { CuentasModule } from '@/api/cuentas/cuentas.module';
+import { MovimientosModule } from '@/api/movimientos/movimientos.module';
+import { UsuarioModule } from '@/api/usuario/usuario.module';
 
 export const setupSwagger = (app: INestApplication, entorno: string) => {
   if (entorno === 'production') {
@@ -27,8 +35,14 @@ export const setupSwagger = (app: INestApplication, entorno: string) => {
     .build();
 
   if (entorno !== 'production') {
-    const document = SwaggerModule.createDocument(app, configSwagger);
-    SwaggerModule.setup('/', app, document);
+    const options: SwaggerCustomOptions = {
+      customSiteTitle: 'Mis Gastos App - Backend',
+    };
+
+    const document = SwaggerModule.createDocument(app, configSwagger, {
+      deepScanRoutes: true,
+    });
+    SwaggerModule.setup('/', app, document, options);
   } else {
     app.use('/', async (req: Request, res: Response) => {
       res

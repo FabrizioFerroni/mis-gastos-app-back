@@ -7,9 +7,9 @@ import { UsuarioModule } from './usuario/usuario.module';
 import { MovimientosModule } from './movimientos/movimientos.module';
 
 @Module({
-  imports: [CategoriasModule, CuentasModule, UsuarioModule, MovimientosModule],
+  imports: [CategoriasModule, CuentasModule, MovimientosModule, UsuarioModule],
   controllers: [StatusController],
   providers: [StatusService],
-  exports: [CategoriasModule, CuentasModule, UsuarioModule],
+  exports: [CategoriasModule, CuentasModule, MovimientosModule, UsuarioModule],
 })
 export class ApiModule {}

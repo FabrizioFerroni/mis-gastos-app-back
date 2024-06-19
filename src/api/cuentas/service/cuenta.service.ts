@@ -138,6 +138,19 @@ export class CuentaService {
     return this.transform.transformDtoObject(cuenta, ResponseCuentaDto);
   }
 
+  async getByIdRel(id: string) {
+    const cuenta = await this.cuentaRepository.obtenerPorIdRel(id);
+
+    if (!cuenta) {
+      this.logger.warn(
+        `No se ha encontrado una cuenta con el id: ${id} en nuestra base de datos`,
+      );
+      throw new NotFoundException('Cuenta no encontrado');
+    }
+
+    return this.transform.transformDtoObject(cuenta, ResponseCuentaDto);
+  }
+
   @OnEvent('user.created')
   async create(dto: AgregarCuentaDto) {
     const {
@@ -200,6 +213,30 @@ export class CuentaService {
 
     // TODO: Ver como editar usuario
     delete cuentaToUpdate['usuario_id'];
+
+    const cuentaUpdated = await this.cuentaRepository.actualizar(
+      id,
+      cuentaToUpdate as CuentaEntity,
+    );
+
+    if (!cuentaUpdated) {
+      return CuentaErrorMensaje.ACCOUNT_NOT_SAVED;
+    }
+
+    this.invalidateAllCacheKeys();
+
+    return CuentaMensaje.ACCOUNT_UPDATED;
+  }
+
+  async incrementAndDecrementSaldo(id: string, saldo: number) {
+    const cuenta = await this.cuentaRepository.obtenerPorId(id);
+
+    if (!cuenta)
+      throw new NotFoundException(CuentaErrorMensaje.ACCOUNT_NOT_FOUND);
+
+    const cuentaToUpdate: Partial<CuentaEntity> = {};
+
+    cuentaToUpdate.saldo = saldo;
 
     const cuentaUpdated = await this.cuentaRepository.actualizar(
       id,

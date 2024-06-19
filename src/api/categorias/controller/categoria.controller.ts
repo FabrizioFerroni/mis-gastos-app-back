@@ -41,7 +41,8 @@ export class CategoriaController {
   @Post()
   @ApiOperation({ summary: 'Agregar una nueva categoria' })
   async create(@Body() dto: AgregarCategoriaDto) {
-    const usuario_id = '1e785ed5-fe90-404a-b08f-a85e07895a27'; //TODO: Cambiar cuando este hecho el modulo de auth con el id que viene del token
+    // const usuario_id = '1e785ed5-fe90-404a-b08f-a85e07895a27'; //TODO: Cambiar cuando este hecho el modulo de auth con el id que viene del token
+    const usuario_id = '279abc05-4e5d-42e8-bdfa-f471b57fbd98';
     return await this.categoriaService.create(dto, usuario_id);
   }
 

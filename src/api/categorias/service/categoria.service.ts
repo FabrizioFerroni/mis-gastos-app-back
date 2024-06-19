@@ -101,6 +101,17 @@ export class CategoriaService {
     return this.transform.transformDtoObject(categoria, ResponseCategoriaDto);
   }
 
+  async getByIdRel(id: string) {
+    const categoria = await this.categoriaRepository.obtenerPorIdRel(id);
+
+    if (!categoria) {
+      this.logger.warn(CategoriaErrorMensaje.CATEGORY_NOT_FOUND_LOG);
+      throw new NotFoundException(CategoriaErrorMensaje.CATEGORY_NOT_FOUND);
+    }
+
+    return this.transform.transformDtoObject(categoria, ResponseCategoriaDto);
+  }
+
   async create(dto: AgregarCategoriaDto, usuario_id?: string) {
     const { nombre, descripcion, color, icono, tipo } = dto;
 

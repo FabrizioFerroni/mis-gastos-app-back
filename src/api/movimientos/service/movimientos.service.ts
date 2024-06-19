@@ -25,6 +25,8 @@ import {
 import { AgregarMovimientoDto } from '../dto/create.dto';
 import { plainToInstance } from 'class-transformer';
 import { EditarMovimientoDto } from '../dto/update.dto';
+import { Tipos } from '@/shared/utils/enums/tipos.enum';
+import { EditarCuentaDto } from '@/api/cuentas/dto/update.cuenta.dto';
 
 const KEY: string = 'movimientos';
 const KEY_USER: string = 'movimientos_usuario';
@@ -162,9 +164,28 @@ export class MovimientosService {
       usuario_id,
     } = dto;
 
-    // TODO: Verificar si la cuenta y categoria pertenecen al usuario que registra un nuevo movimiento
-    // TODO: Dependiendo del tipo de ingreso restar saldo a la cuenta o sumar. ( Esto dependera del tipo de cuenta)
-    // TODO: Tambien verificar si el tipo es ingreso ponga una categoria de tipo ingreso, igual para egreso
+    const cuenta = await this.cuentaServicio.getByIdRel(cuenta_id);
+
+    if (cuenta.usuario.id !== usuario_id) {
+      throw new BadRequestException(
+        'La cuenta a la que quieres agregar un movimiento no pertenece a tu usuario',
+      );
+    }
+
+    const categoria = await this.categoriaServicio.getByIdRel(categoria_id);
+
+    if (categoria.usuario.id !== usuario_id) {
+      throw new BadRequestException(
+        'La categoria a la que quieres agregar un movimiento no pertenece a tu usuario',
+      );
+    }
+
+    if (tipo !== categoria.tipo) {
+      throw new BadRequestException(
+        'El tipo de movimiento que estas queriendo agregar no se corresponde al tipo de la categoria. Por favor ingresa otra',
+      );
+    }
+
     const newMovement = {
       tipo,
       estado,
@@ -185,6 +206,29 @@ export class MovimientosService {
     }
 
     this.invalidateAllCacheKeys();
+
+    // OK: Dependiendo del tipo de ingreso restar saldo a la cuenta o sumar.
+    // TODO: ( Esto dependera del tipo de cuenta)
+    const saldoCuenta = cuenta.saldo;
+    let newSaldo = 0;
+
+    switch (tipo) {
+      case Tipos.INGRESO: {
+        newSaldo = saldoCuenta + movimiento;
+        break;
+      }
+
+      case Tipos.EGRESO: {
+        newSaldo = saldoCuenta - movimiento;
+        break;
+      }
+
+      default: {
+        break;
+      }
+    }
+
+    await this.cuentaServicio.incrementAndDecrementSaldo(cuenta.id, newSaldo);
 
     return MovimientoMensaje.MOVEMENT_OK;
   }
