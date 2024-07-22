@@ -1,7 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
+  IsDate,
   IsEnum,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
   IsUUID,
@@ -9,35 +11,42 @@ import {
 } from 'class-validator';
 import { Tipos } from '@/shared/utils/enums/tipos.enum';
 
-export class AgregarCategoriaDto {
-  @IsString()
-  @MinLength(3)
-  @IsNotEmpty()
-  @ApiProperty()
-  nombre: string;
-
-  @IsString()
-  @MinLength(3)
-  @IsOptional()
-  @ApiProperty()
-  descripcion: string;
-
-  @IsString()
-  @IsOptional()
-  @ApiProperty()
-  color: string;
-
-  @IsString()
-  @MinLength(1)
-  @IsOptional()
-  @ApiProperty()
-  icono: string;
-
+export class EditarMovimientoDto {
   @IsEnum(Tipos)
-  @MinLength(1)
-  @IsNotEmpty()
+  @IsOptional()
   @ApiProperty()
   tipo: Tipos;
+
+  @IsNumber()
+  @IsOptional()
+  @ApiProperty()
+  estado: number;
+
+  @IsDate()
+  @IsOptional()
+  @ApiProperty()
+  fecha: Date;
+
+  @IsString()
+  @MinLength(1)
+  @IsOptional()
+  @ApiProperty()
+  concepto: string;
+
+  @IsNumber({ maxDecimalPlaces: 2 })
+  @IsOptional()
+  @ApiProperty()
+  movimiento: number;
+
+  @IsUUID()
+  @IsOptional()
+  @ApiProperty()
+  categoria_id: string;
+
+  @IsUUID()
+  @IsOptional()
+  @ApiProperty()
+  cuenta_id: string;
 
   @IsUUID()
   @IsOptional()

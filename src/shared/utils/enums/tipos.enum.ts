@@ -1,4 +1,4 @@
-export enum TipoCategoria {
+export enum Tipos {
   INGRESO = 'Ingreso',
   EGRESO = 'Egreso',
 }

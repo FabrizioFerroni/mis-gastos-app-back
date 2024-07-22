@@ -30,6 +30,7 @@ export class ResponseCuentaDto {
 
   @Expose()
   usuario: UsuarioEntity;
+
   @Exclude()
   createdAt: Date;
 

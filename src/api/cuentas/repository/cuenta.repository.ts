@@ -72,6 +72,18 @@ export class CuentaRepository
     return await this.findOneById(id);
   }
 
+  async obtenerPorIdRel(id: string): Promise<CuentaEntity> {
+    const options = {
+      where: {
+        id: id,
+      },
+      relations: {
+        usuario: true,
+      },
+    };
+    return await this.findByCondition(options);
+  }
+
   async guardar(data: CuentaEntity): Promise<CuentaEntity> {
     const create: CuentaEntity = this.create(data);
     const cuentaSaved: CuentaEntity = await this.save(create);

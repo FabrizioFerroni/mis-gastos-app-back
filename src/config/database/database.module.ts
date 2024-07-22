@@ -6,6 +6,7 @@ import { ConfigModule } from '@nestjs/config';
 import { CuentaEntity } from '@/api/cuentas/entity/cuenta.entity';
 import BDFileLogs from './logger/BDFileLog';
 import { CategoriaEntity } from '@/api/categorias/entity/categoria.entyty';
+import { MovimientoEntity } from '@/api/movimientos/entity/movimientos.entity';
 
 @Module({
   imports: [
@@ -23,7 +24,12 @@ import { CategoriaEntity } from '@/api/categorias/entity/categoria.entyty';
         username: configApp().database.username,
         password: configApp().database.password,
         database: configApp().database.database,
-        entities: [UsuarioEntity, CuentaEntity, CategoriaEntity],
+        entities: [
+          UsuarioEntity,
+          CuentaEntity,
+          CategoriaEntity,
+          MovimientoEntity,
+        ],
         synchronize:
           configApp().env === 'development'
             ? true
