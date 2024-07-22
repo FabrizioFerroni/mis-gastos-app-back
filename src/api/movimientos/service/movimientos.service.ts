@@ -27,9 +27,10 @@ import { plainToInstance } from 'class-transformer';
 import { EditarMovimientoDto } from '../dto/update.dto';
 import { Tipos } from '@/shared/utils/enums/tipos.enum';
 import { EditarCuentaDto } from '@/api/cuentas/dto/update.cuenta.dto';
+import { separateUUIDUser } from '@/shared/utils/functions/separate-uuid';
 
 const KEY: string = 'movimientos';
-const KEY_USER: string = 'movimientos_usuario';
+const KEY_USER: string = 'movimientos';
 
 @Injectable()
 export class MovimientosService {
@@ -45,7 +46,8 @@ export class MovimientosService {
       MovimientoEntity,
       ResponseMovimientoDto
     >,
-    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    @Inject(CACHE_MANAGER)
+    private readonly cacheManager: Cache,
     @Inject(CuentaService)
     private readonly cuentaServicio: CuentaService,
     @Inject(CategoriaService)
@@ -101,7 +103,7 @@ export class MovimientosService {
     const take = limit ?? DefaultPageSize.MOVEMENT;
     const skip = this.paginationService.calculateOffset(limit, page);
 
-    const cacheKey = `${KEY_USER}-${page}-${limit}`;
+    const cacheKey = `${KEY_USER}_${separateUUIDUser(usuario_id)}-${page}-${limit}`;
 
     const usuario = await this.usuarioServicio.findOne(usuario_id);
 
@@ -140,6 +142,7 @@ export class MovimientosService {
   }
 
   async getById(id: string) {
+    // TODO: ver de buscar tambien que coincida con el usuario_id
     const movimiento = await this.movimientoRepository.obtenerPorId(id);
 
     if (!movimiento) {
@@ -207,8 +210,7 @@ export class MovimientosService {
 
     this.invalidateAllCacheKeys();
 
-    // OK: Dependiendo del tipo de ingreso restar saldo a la cuenta o sumar.
-    // TODO: ( Esto dependera del tipo de cuenta)
+    // *OK: Dependiendo del tipo de ingreso restar saldo a la cuenta o sumar. ( Esto dependera del tipo de cuenta)
     const saldoCuenta = cuenta.saldo;
     let newSaldo = 0;
 
@@ -247,7 +249,7 @@ export class MovimientosService {
       }
     }
 
-    // TODO: Ver como editar usuario
+    // TODO: Ver como editar usuario ? ( no entendí que quise decir )
     delete movementToUpdated['cuenta_id'];
     delete movementToUpdated['categoria_id'];
     delete movementToUpdated['usuario_id'];
