@@ -1,6 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ValidationPipe } from '@nestjs/common';
+import { RequestMethod, ValidationPipe } from '@nestjs/common';
 import { CustomExceptionFilter } from './shared/filters/exceptions.filter';
 import { configStrings } from './config/app/config.strings';
 import { setupSwagger } from './config/swagger/config.swagger.app';
@@ -15,6 +15,7 @@ async function bootstrap() {
   const hostCredentials = configApp().hostCredentials;
   const entorno = configApp().env;
   const apiPort = configApp().apiPort;
+  const tz = configApp().tz;
 
   app.enableCors({
     origin: hostCors,
@@ -26,6 +27,7 @@ async function bootstrap() {
   app.useGlobalFilters(new CustomExceptionFilter());
 
   app.use((req, res, next) => {
+    req.timezone = tz;
     res.removeHeader('X-Powered-By');
     next();
   });
@@ -43,7 +45,9 @@ async function bootstrap() {
       },
     }),
   );
-  app.setGlobalPrefix(configStrings().apiVersion, { exclude: ['estado'] });
+  app.setGlobalPrefix(configStrings().apiVersion, {
+    exclude: ['estado', { path: 'auth/(.*)', method: RequestMethod.ALL }],
+  });
   setupSwagger(app, entorno);
 
   await app.listen(apiPort);

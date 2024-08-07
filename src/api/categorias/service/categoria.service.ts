@@ -23,6 +23,7 @@ import {
 import { AgregarCategoriaDto } from '../dto/create.categoria';
 import { plainToInstance } from 'class-transformer';
 import { EditarCategoriaDto } from '../dto/update.categoria';
+import { separateUUIDUser } from '@/shared/utils/functions/separate-uuid';
 
 const KEY: string = 'categorias';
 
@@ -53,7 +54,7 @@ export class CategoriaService {
     const take = limit ?? DefaultPageSize.CATEGORY;
     const skip = this.paginationService.calculateOffset(limit, page);
 
-    const cacheKey = `${KEY}-${page}-${limit}`;
+    const cacheKey = `${KEY}_${separateUUIDUser(usuario_id)}-p${page}-l${limit}`;
 
     const usuario = await this.usuarioServicio.findOne(usuario_id);
 

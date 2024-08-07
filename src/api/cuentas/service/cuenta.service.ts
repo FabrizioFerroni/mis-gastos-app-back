@@ -24,6 +24,7 @@ import { PaginationDto } from '@/shared/utils/dtos/pagination.dto';
 import { PaginationService } from '@/core/services/pagination.service';
 import { DefaultPageSize } from '@/shared/utils/constants/querying';
 import { OnEvent } from '@nestjs/event-emitter';
+import { separateUUIDUser } from '@/shared/utils/functions/separate-uuid';
 
 const KEY: string = 'cuentas';
 const KEY_USER: string = 'cuentas_usuario';
@@ -88,7 +89,7 @@ export class CuentaService {
     const take = limit ?? DefaultPageSize.ACCOUNT;
     const skip = this.paginationService.calculateOffset(limit, page);
 
-    const cacheKey = `${KEY_USER}-${page}-${limit}`;
+    const cacheKey = `${KEY}_${separateUUIDUser(usuario_id)}-p${page}-l${limit}`;
 
     const usuario = await this.usuarioServicio.findOne(usuario_id);
 

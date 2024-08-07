@@ -18,6 +18,6 @@ import { UsuarioInterfaceRepository } from './repository/usuario.interface.repos
     },
     TransformDto,
   ],
-  exports: [UsuarioService],
+  exports: [UsuarioInterfaceRepository, TransformDto, UsuarioService],
 })
 export class UsuarioModule {}

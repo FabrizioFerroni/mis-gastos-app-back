@@ -5,6 +5,7 @@ import {
   IsString,
   IsStrongPassword,
   MinLength,
+  IsOptional,
 } from 'class-validator';
 import { UserMessagesError } from '../errors/error-messages';
 import { PasswordVerify } from '../validations /passwordverify.validation';
@@ -51,13 +52,13 @@ export class AgregarUsuarioDto {
   confirm_password: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   @MinLength(3)
   @ApiProperty()
   pais: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   @MinLength(3)
   @ApiProperty()
   localizacion: string;

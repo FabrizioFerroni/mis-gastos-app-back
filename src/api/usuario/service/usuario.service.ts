@@ -94,6 +94,8 @@ export class UsuarioService {
       take,
     );
 
+    resp.forEach((user) => delete user.password);
+
     const users: UsuarioEntity[] = this.transform.transformDtoArray(
       resp,
       ResponseUsuarioDto,
@@ -109,6 +111,7 @@ export class UsuarioService {
 
   async findOne(id: string) {
     const user = await this.usuarioRepository.obtenerPorId(id);
+    delete user.password;
 
     if (!user) {
       this.logger.warn(

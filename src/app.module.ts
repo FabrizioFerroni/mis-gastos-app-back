@@ -13,6 +13,7 @@ import { DatabaseModule } from './config/database/database.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import { redisStore } from 'cache-manager-redis-yet';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -67,8 +68,8 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     CoreModule,
     ApiModule,
     DatabaseModule,
+    AuthModule,
   ],
-  controllers: [],
   providers: [
     {
       provide: APP_GUARD,

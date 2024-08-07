@@ -4,6 +4,9 @@ keys.json
 /notes
 sonar.properties
 
+# ocultar carpeta keys donde se aloja la key privada
+keys/
+
 ### Build ###
 dist
 
