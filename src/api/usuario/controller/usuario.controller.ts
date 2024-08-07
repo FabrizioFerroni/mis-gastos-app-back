@@ -7,14 +7,19 @@ import {
   Delete,
   Put,
   Query,
+  HttpCode,
+  HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
 import { UsuarioService } from '../service/usuario.service';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AgregarUsuarioDto } from '../dto/create.user.dto';
 import { EditarUsuarioDto } from '../dto/update.user';
+import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
 
 @Controller('usuarios')
 @ApiTags('Usuarios')
+@UseGuards(JwtAuthGuard)
 export class UsuarioController {
   constructor(private readonly usuarioService: UsuarioService) {}
 
@@ -54,6 +59,7 @@ export class UsuarioController {
 
   @Post(':id')
   @ApiOperation({ summary: 'Recuperar un estado por su id' })
+  @HttpCode(HttpStatus.OK)
   async recover(@Param('id') id: string) {
     return this.usuarioService.recover(id);
   }

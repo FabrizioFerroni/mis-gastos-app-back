@@ -6,14 +6,21 @@ export type ConfigApp = {
   limit: number;
   max_pass_failures: number;
   secret_jwt: string;
+  secret_jwt_refresh: string;
   secret_jwt_register: string;
   mailServiceUrl: string;
   passPrivateKey: string;
+  pathPrivateKey: string;
+  tz: string;
   database: DbConfig;
   frontHost: string;
   hostMethod: string;
   hostAllowedHeader: string;
   hostCredentials: boolean;
+  exchange: string;
+  appHost: string;
+  appMail: string;
+  appImg: string;
 };
 
 export type ConfigAppRedis = {

@@ -50,7 +50,7 @@ export class CustomExceptionFilter implements ExceptionFilter {
       return response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
         status_code: HttpStatus.INTERNAL_SERVER_ERROR,
         message: MessagesError.INTERNAL_EXCEPTION,
-        messageServer: entorno === 'dev' ? exception : null,
+        messageServer: entorno === 'development' ? exception : null,
         timestamp: new Date().toISOString(),
         path: request.url,
       });

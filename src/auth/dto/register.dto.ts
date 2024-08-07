@@ -1,3 +1,5 @@
+import { UserMessagesError } from '@/api/usuario/errors/error-messages';
+import { PasswordVerify } from '@/api/usuario/validations /passwordverify.validation';
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsEmail,
@@ -5,10 +7,7 @@ import {
   IsString,
   IsStrongPassword,
   MinLength,
-  IsOptional,
 } from 'class-validator';
-import { UserMessagesError } from '../errors/error-messages';
-import { PasswordVerify } from '../validations /passwordverify.validation';
 
 export class AgregarUsuarioDto {
   @IsString()
@@ -50,16 +49,4 @@ export class AgregarUsuarioDto {
   @ApiProperty()
   @PasswordVerify('password')
   confirm_password: string;
-
-  @IsString()
-  @IsOptional()
-  @MinLength(3)
-  @ApiProperty()
-  pais: string;
-
-  @IsString()
-  @IsOptional()
-  @MinLength(3)
-  @ApiProperty()
-  localizacion: string;
 }

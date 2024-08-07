@@ -7,6 +7,7 @@ import { CuentaEntity } from '@/api/cuentas/entity/cuenta.entity';
 import BDFileLogs from './logger/BDFileLog';
 import { CategoriaEntity } from '@/api/categorias/entity/categoria.entyty';
 import { MovimientoEntity } from '@/api/movimientos/entity/movimientos.entity';
+import { TokenEntity } from '@/api/token/entity/token.entity';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { MovimientoEntity } from '@/api/movimientos/entity/movimientos.entity';
           CuentaEntity,
           CategoriaEntity,
           MovimientoEntity,
+          TokenEntity,
         ],
         synchronize:
           configApp().env === 'development'

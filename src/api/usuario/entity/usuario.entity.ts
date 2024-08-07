@@ -25,7 +25,7 @@ export class UsuarioEntity {
   @Column()
   email: string;
 
-  @Column({ select: false })
+  @Column({ select: true })
   password: string;
 
   @Column({ default: false, select: true })

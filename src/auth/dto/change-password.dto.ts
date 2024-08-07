@@ -4,29 +4,21 @@ import {
   IsNotEmpty,
   IsString,
   IsStrongPassword,
-  MinLength,
-  IsOptional,
 } from 'class-validator';
-import { UserMessagesError } from '../errors/error-messages';
-import { PasswordVerify } from '../validations /passwordverify.validation';
+import { AuthMessagesError } from '../errors/error-messages';
+import { UserMessagesError } from '@/api/usuario/errors/error-messages';
+import { PasswordVerify } from '@/api/usuario/validations /passwordverify.validation';
 
-export class AgregarUsuarioDto {
-  @IsString()
-  @MinLength(3)
-  @IsNotEmpty()
-  @ApiProperty()
-  nombre: string;
-
-  @IsString()
-  @IsNotEmpty()
-  @MinLength(3)
-  @ApiProperty()
-  apellido: string;
-
-  @IsEmail()
+export class ChangePasswordDto {
+  @IsEmail({}, { message: AuthMessagesError.USER_EMAIL_VALID })
   @IsNotEmpty()
   @ApiProperty()
   email: string;
+
+  @IsNotEmpty()
+  @IsString()
+  @ApiProperty()
+  token: string;
 
   @IsString()
   @IsNotEmpty()
@@ -50,16 +42,4 @@ export class AgregarUsuarioDto {
   @ApiProperty()
   @PasswordVerify('password')
   confirm_password: string;
-
-  @IsString()
-  @IsOptional()
-  @MinLength(3)
-  @ApiProperty()
-  pais: string;
-
-  @IsString()
-  @IsOptional()
-  @MinLength(3)
-  @ApiProperty()
-  localizacion: string;
 }

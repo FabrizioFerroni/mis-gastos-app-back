@@ -13,4 +13,5 @@ export enum UserMessagesError {
   USER_MAIL_SEND = 'Instructions have been sent by email. Please check your box.',
   USER_MAIL_DIFFERENT = 'The user you have entered does not correspond to the one you previously registered with',
   USER_TOKEN_USED = 'The token sent is not valid or has already been used previously.',
+  USER_VALIDATED = 'User validated successfully',
 }
