@@ -3,6 +3,7 @@ import {
   Body,
   ClassSerializerInterceptor,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Param,
@@ -12,7 +13,13 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { AuthService } from '../services/auth.service';
-import { ApiHeader, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiHeader,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { UsuarioEntity } from '@/api/usuario/entity/usuario.entity';
 import { LocalGuard } from '../guards/local.guard';
 import { ErrorResponseDto } from '@/shared/utils/dtos/swagger/errorresponse.dto';
@@ -25,6 +32,9 @@ import { VerifyDto } from '../dto/verify.dto';
 import { ForgotPasswordDto } from '../dto/forgot-password';
 import { ChangePasswordDto } from '../dto/change-password.dto';
 import { RefreshtokenDto } from '../dto/refresh-token.dto';
+import { Authorize } from '../decorators/authorized.decorator';
+import { User } from '../decorators/user.decorator';
+import { UsuarioService } from '@/api/usuario/service/usuario.service';
 
 @Controller('auth')
 @ApiTags('Autenticación')
@@ -33,6 +43,7 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly tokenService: TokenService,
+    private readonly usuarioService: UsuarioService,
   ) {}
 
   @ApiResponse({
@@ -70,9 +81,7 @@ export class AuthController {
   @Post('iniciarsesion')
   @HttpCode(HttpStatus.OK)
   @UseGuards(LocalGuard)
-  login(@Req() req: Request) {
-    const user = req['user'] as UsuarioEntity;
-
+  login(@User() user: UsuarioEntity) {
     const payload: PayloadDto = {
       email: user.email,
       id: user.id,
@@ -202,8 +211,8 @@ export class AuthController {
   @ApiOperation({
     summary: 'Metodo para cambiar la clave del usuario',
   })
-  @Post('cambiar-clave/:token')
   @HttpCode(HttpStatus.OK)
+  @Post('cambiar-clave/:token')
   changePassword(
     @Param('token') token: string,
     @Body() dto: ChangePasswordDto,
@@ -221,8 +230,70 @@ export class AuthController {
   @ApiOperation({
     summary: 'Metodo para refrescar el token del usuario',
   })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: OkResponseDto,
+    description: 'Metodo para refrescar el token del usuario',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    type: ErrorResponseDto,
+    description: 'Datos incorrectos',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    type: ErrorResponseDto,
+    description: 'No autorizado',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    type: ErrorResponseDto,
+    description: 'Usuario no encontrado',
+  })
+  @ApiResponse({
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    type: ErrorResponseDto,
+    description: 'Hubo un error interno en el servidor',
+  })
+  @Authorize()
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
   refreshToken(@Body() dto: RefreshtokenDto) {
     return this.authService.refresh(dto);
+  }
+
+  @Get('profile')
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: OkResponseDto,
+    description: 'Metodo para obtener datos del usuario logueado',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    type: ErrorResponseDto,
+    description: 'Datos incorrectos',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    type: ErrorResponseDto,
+    description: 'No autorizado',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    type: ErrorResponseDto,
+    description: 'Usuario no encontrado',
+  })
+  @ApiResponse({
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    type: ErrorResponseDto,
+    description: 'Hubo un error interno en el servidor',
+  })
+  @ApiOperation({
+    summary: 'Metodo para obtener datos del usuario logueado',
+  })
+  @Authorize()
+  @ApiBearerAuth()
+  obtainUser(@User() { id }: UsuarioEntity) {
+    return this.usuarioService.findOne(id);
   }
 }
