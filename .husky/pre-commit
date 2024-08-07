@@ -6,6 +6,6 @@ if [ "$branch" = "prod" ] || [ "$branch" = "pre" ] || [ "$branch" = "dev" ]; the
   exit 1
 fi
 
-npm run lint
+npm run lint:fix
 
 npx lint-staged
