@@ -9,17 +9,23 @@ import {
   Query,
   HttpCode,
   HttpStatus,
-  UseGuards,
 } from '@nestjs/common';
 import { UsuarioService } from '../service/usuario.service';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiExcludeController,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import { AgregarUsuarioDto } from '../dto/create.user.dto';
 import { EditarUsuarioDto } from '../dto/update.user';
-import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
+import { Authorize } from '@/auth/decorators/authorized.decorator';
 
 @Controller('usuarios')
+@ApiExcludeController()
 @ApiTags('Usuarios')
-@UseGuards(JwtAuthGuard)
+@ApiBearerAuth()
+@Authorize()
 export class UsuarioController {
   constructor(private readonly usuarioService: UsuarioService) {}
 

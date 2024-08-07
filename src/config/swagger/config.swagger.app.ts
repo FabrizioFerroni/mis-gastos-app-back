@@ -7,10 +7,6 @@ import { INestApplication } from '@nestjs/common';
 import { join } from 'path';
 import { Request, Response } from 'express';
 import * as express from 'express';
-import { CategoriasModule } from '@/api/categorias/categorias.module';
-import { CuentasModule } from '@/api/cuentas/cuentas.module';
-import { MovimientosModule } from '@/api/movimientos/movimientos.module';
-import { UsuarioModule } from '@/api/usuario/usuario.module';
 
 export const setupSwagger = (app: INestApplication, entorno: string) => {
   if (entorno === 'production') {
