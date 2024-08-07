@@ -72,6 +72,26 @@ export class CuentaRepository
     return await this.findOneById(id);
   }
 
+  async obtenerPorIdYUsuarioId(
+    id: string,
+    usuario: UsuarioEntity,
+  ): Promise<CuentaEntity> {
+    const options = {
+      where: {
+        id: String(id),
+        usuario: usuario,
+      },
+    };
+
+    const cuenta = await this.findByCondition(options);
+
+    if (!cuenta) {
+      return null;
+    }
+
+    return cuenta;
+  }
+
   async obtenerPorIdRel(id: string): Promise<CuentaEntity> {
     const options = {
       where: {

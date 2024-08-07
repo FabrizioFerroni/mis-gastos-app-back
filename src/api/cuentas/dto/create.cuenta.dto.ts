@@ -52,7 +52,6 @@ export class AgregarCuentaDto {
   nro_cuenta: string;
 
   @IsUUID()
-  @IsNotEmpty()
-  @ApiProperty()
+  @IsOptional()
   usuario_id: string;
 }

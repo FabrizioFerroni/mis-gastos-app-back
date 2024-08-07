@@ -57,47 +57,7 @@ export class MovimientosService {
     private readonly paginationService: PaginationService,
   ) {}
 
-  async findAll(param: PaginationDto) {
-    const { page, limit } = param;
-
-    const take = limit ?? DefaultPageSize.MOVEMENT;
-    const skip = this.paginationService.calculateOffset(limit, page);
-
-    const cacheKey = `${KEY}-${page}-${limit}`;
-
-    const movimientosCache = await this.cacheManager.get<{
-      movimientos: MovimientoEntity[];
-      meta: PaginationMeta;
-    }>(cacheKey);
-
-    const [data, count] = await this.movimientoRepository.obtenerTodosAndCount(
-      skip,
-      take,
-    );
-
-    const movimientos: MovimientoEntity[] = this.transform.transformDtoArray(
-      data,
-      ResponseMovimientoDto,
-    );
-
-    const meta = this.paginationService.createMeta(limit, page, count);
-
-    if (movimientosCache) {
-      const respMovimientos = this.transform.transformDtoArray(
-        movimientosCache.movimientos,
-        ResponseMovimientoDto,
-      );
-
-      return { movimientos: respMovimientos, meta: movimientosCache.meta };
-    }
-
-    const response = { movimientos, meta };
-    await this.cacheManager.set(cacheKey, response);
-
-    return response;
-  }
-
-  async findAllByUser(usuario_id: string, param: PaginationDto) {
+  async findAll(usuario_id: string, param: PaginationDto) {
     const { page, limit } = param;
 
     const take = limit ?? DefaultPageSize.MOVEMENT;
@@ -141,13 +101,16 @@ export class MovimientosService {
     return response;
   }
 
-  async getById(id: string) {
-    // TODO: ver de buscar tambien que coincida con el usuario_id
-    const movimiento = await this.movimientoRepository.obtenerPorId(id);
+  async getById(id: string, usuario_id: string) {
+    const usuario = await this.usuarioServicio.findOne(usuario_id);
+    const movimiento = await this.movimientoRepository.obtenerPorIdYUserId(
+      id,
+      usuario,
+    );
 
     if (!movimiento) {
       this.logger.warn(
-        `No se ha encontrado un movimiento con el id: ${id} en nuestra base de datos`,
+        `No se ha encontrado un movimiento con el id: ${id} en nuestra base de datos para el usuario ${usuario.nombre} ${usuario.apellido}`,
       );
       throw new NotFoundException(MovimientoErrorMensaje.MOVEMENT_NOT_FOUND);
     }
@@ -155,7 +118,7 @@ export class MovimientosService {
     return this.transform.transformDtoObject(movimiento, ResponseMovimientoDto);
   }
 
-  async create(dto: AgregarMovimientoDto) {
+  async create(dto: AgregarMovimientoDto, usuario_id: string) {
     const {
       tipo,
       estado,
@@ -164,7 +127,6 @@ export class MovimientosService {
       movimiento,
       categoria_id,
       cuenta_id,
-      usuario_id,
     } = dto;
 
     const cuenta = await this.cuentaServicio.getByIdRel(cuenta_id);
@@ -235,7 +197,7 @@ export class MovimientosService {
     return MovimientoMensaje.MOVEMENT_OK;
   }
 
-  async update(id: string, dto: EditarMovimientoDto) {
+  async update(id: string, dto: EditarMovimientoDto, usuario_id: string) {
     const cuenta = await this.movimientoRepository.obtenerPorId(id);
 
     if (!cuenta)
@@ -248,6 +210,8 @@ export class MovimientosService {
         movementToUpdated[key] = dto[key];
       }
     }
+
+    // movementToUpdated.usuario = usuario_id;
 
     // TODO: Ver como editar usuario ? ( no entendí que quise decir )
     delete movementToUpdated['cuenta_id'];

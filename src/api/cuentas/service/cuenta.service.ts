@@ -126,8 +126,12 @@ export class CuentaService {
     return response;
   }
 
-  async getById(id: string) {
-    const cuenta = await this.cuentaRepository.obtenerPorId(id);
+  async getById(id: string, usuario_id: string) {
+    const usuario = await this.usuarioServicio.findOne(usuario_id);
+    const cuenta = await this.cuentaRepository.obtenerPorIdYUsuarioId(
+      id,
+      usuario,
+    );
 
     if (!cuenta) {
       this.logger.warn(

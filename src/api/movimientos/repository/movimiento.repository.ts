@@ -70,6 +70,26 @@ export class MovimientoRepository
     return await this.findOneById(id);
   }
 
+  async obtenerPorIdYUserId(
+    id: string,
+    usuario?: UsuarioEntity,
+  ): Promise<MovimientoEntity> {
+    const options = {
+      where: {
+        id: String(id),
+        usuario: usuario,
+      },
+    };
+
+    const movimiento = await this.findByCondition(options);
+
+    if (!movimiento) {
+      return null;
+    }
+
+    return movimiento;
+  }
+
   async guardar(data: MovimientoEntity): Promise<MovimientoEntity> {
     const create: MovimientoEntity = this.create(data);
     const movimientoSaved: MovimientoEntity = await this.save(create);

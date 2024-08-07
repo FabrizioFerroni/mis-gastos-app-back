@@ -67,11 +67,11 @@ export class MovimientosController {
   })
   @ApiQuery({ name: 'page', type: 'number', required: false })
   @ApiQuery({ name: 'limit', type: 'number', required: false })
-  findAllByUser(
+  findAll(
     @User() { id: usuario_id }: UsuarioEntity,
     @Query() param: PaginationDto,
   ) {
-    return this.movimientoService.findAllByUser(usuario_id, param);
+    return this.movimientoService.findAll(usuario_id, param);
   }
 
   @Get(':id')
@@ -101,8 +101,11 @@ export class MovimientosController {
     description: 'Hubo un error interno en el servidor',
   })
   @ApiOperation({ summary: 'Buscar un movimietno por el id' })
-  async findOne(@Param('id') id: string) {
-    return await this.movimientoService.getById(id);
+  async findOne(
+    @User() { id: usuario_id }: UsuarioEntity,
+    @Param('id') id: string,
+  ) {
+    return await this.movimientoService.getById(id, usuario_id);
   }
 
   @Post()
@@ -132,8 +135,11 @@ export class MovimientosController {
     description: 'Hubo un error interno en el servidor',
   })
   @ApiOperation({ summary: 'Agregar un nuevo movimiento' })
-  async create(@Body() dto: AgregarMovimientoDto) {
-    return await this.movimientoService.create(dto);
+  async create(
+    @User() { id: usuario_id }: UsuarioEntity,
+    @Body() dto: AgregarMovimientoDto,
+  ) {
+    return await this.movimientoService.create(dto, usuario_id);
   }
 
   @Put(':id')
@@ -163,8 +169,12 @@ export class MovimientosController {
     description: 'Hubo un error interno en el servidor',
   })
   @ApiOperation({ summary: 'Editar un movimiento por su id' })
-  async update(@Param('id') id: string, @Body() dto: EditarMovimientoDto) {
-    return await this.movimientoService.update(id, dto);
+  async update(
+    @User() { id: usuario_id }: UsuarioEntity,
+    @Param('id') id: string,
+    @Body() dto: EditarMovimientoDto,
+  ) {
+    return await this.movimientoService.update(id, dto, usuario_id);
   }
 
   @Delete(':id')

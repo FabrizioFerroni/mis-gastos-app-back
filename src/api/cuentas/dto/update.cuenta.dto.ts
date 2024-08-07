@@ -52,6 +52,5 @@ export class EditarCuentaDto {
 
   @IsUUID()
   @IsOptional()
-  @ApiProperty()
   usuario_id: string;
 }
