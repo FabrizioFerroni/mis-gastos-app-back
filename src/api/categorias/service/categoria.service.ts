@@ -229,7 +229,7 @@ export class CategoriaService {
   }
 
   async invalidateAllCacheKeys() {
-    const keys = await this.cacheManager.store.keys(`${KEY}-*`);
+    const keys = await this.cacheManager.store.keys(`${KEY}_*`);
 
     for (const key of keys) {
       await this.cacheManager.del(key);

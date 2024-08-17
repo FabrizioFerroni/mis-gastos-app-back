@@ -13,7 +13,7 @@ import {
 import { Tipos } from '@/shared/utils/enums/tipos.enum';
 
 @Entity({ name: 'categorias' })
-@Unique(['nombre'])
+@Unique(['nombre', 'usuario'])
 export class CategoriaEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
