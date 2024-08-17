@@ -17,6 +17,10 @@ export abstract class MovimientoInterfaceRepository extends BaseAbstractReposito
     take?: number,
   ): Promise<[MovimientoEntity[], number]>;
   abstract obtenerPorId(id: string): Promise<MovimientoEntity>;
+  abstract obtenerPorIdYUserId(
+    id: string,
+    usuario?: UsuarioEntity,
+  ): Promise<MovimientoEntity>;
   abstract borrar(id: string): Promise<UpdateResult>;
   abstract actualizar(
     id: string,

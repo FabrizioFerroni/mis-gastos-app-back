@@ -47,9 +47,4 @@ export class EditarMovimientoDto {
   @IsOptional()
   @ApiProperty()
   cuenta_id: string;
-
-  @IsUUID()
-  @IsOptional()
-  @ApiProperty()
-  usuario_id: string;
 }

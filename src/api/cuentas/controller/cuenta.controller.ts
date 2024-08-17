@@ -68,9 +68,9 @@ export class CuentaController {
   @ApiQuery({ name: 'limit', type: 'number', required: false })
   findAllByUser(
     @User() { id: usuario_id }: UsuarioEntity,
-    @Query() pagination: PaginationDto,
+    @Query() param: PaginationDto,
   ) {
-    return this.cuentaService.findAllByUser(usuario_id, pagination);
+    return this.cuentaService.findAllByUser(usuario_id, param);
   }
 
   @Get(':id')
@@ -100,8 +100,11 @@ export class CuentaController {
     description: 'Hubo un error interno en el servidor',
   })
   @ApiOperation({ summary: 'Buscar una cuenta por el id' })
-  async findOne(@Param('id') id: string) {
-    return await this.cuentaService.getById(id);
+  async findOne(
+    @User() { id: usuario_id }: UsuarioEntity,
+    @Param('id') id: string,
+  ) {
+    return await this.cuentaService.getById(id, usuario_id);
   }
 
   @Post()
@@ -131,7 +134,11 @@ export class CuentaController {
     description: 'Hubo un error interno en el servidor',
   })
   @ApiOperation({ summary: 'Agregar una nueva cuenta' })
-  async create(@Body() dto: AgregarCuentaDto) {
+  async create(
+    @User() { id: usuario_id }: UsuarioEntity,
+    @Body() dto: AgregarCuentaDto,
+  ) {
+    dto.usuario_id = usuario_id;
     return await this.cuentaService.create(dto);
   }
 
@@ -162,7 +169,12 @@ export class CuentaController {
     description: 'Hubo un error interno en el servidor',
   })
   @ApiOperation({ summary: 'Editar una cuenta' })
-  async update(@Param('id') id: string, @Body() dto: EditarCuentaDto) {
+  async update(
+    @User() { id: usuario_id }: UsuarioEntity,
+    @Param('id') id: string,
+    @Body() dto: EditarCuentaDto,
+  ) {
+    dto.usuario_id = usuario_id;
     return await this.cuentaService.update(id, dto);
   }
 

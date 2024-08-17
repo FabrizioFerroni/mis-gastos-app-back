@@ -255,8 +255,6 @@ export class AuthController {
     type: ErrorResponseDto,
     description: 'Hubo un error interno en el servidor',
   })
-  @Authorize()
-  @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
   refreshToken(@Body() dto: RefreshtokenDto) {
     return this.authService.refresh(dto);
