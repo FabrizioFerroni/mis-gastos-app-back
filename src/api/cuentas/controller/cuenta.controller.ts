@@ -73,6 +73,11 @@ export class CuentaController {
     return this.cuentaService.findAllByUser(usuario_id, param);
   }
 
+  @Get('listar')
+  findAll(@User() { id: usuario_id }: UsuarioEntity) {
+    return this.cuentaService.findAll(usuario_id);
+  }
+
   @Get(':id')
   @ApiResponse({
     status: HttpStatus.OK,

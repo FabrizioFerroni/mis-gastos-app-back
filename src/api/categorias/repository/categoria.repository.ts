@@ -21,7 +21,17 @@ export class CategoriaRepository
     super(repository);
   }
 
-  async obtenerTodos(
+  async obtenerTodos(usuario: UsuarioEntity): Promise<CategoriaEntity[]> {
+    const options = {
+      where: {
+        usuario: usuario,
+      },
+    };
+
+    return await this.findAll(options);
+  }
+
+  async obtenerTodosPorUsuario(
     usuario: UsuarioEntity,
     skip?: number,
     take?: number,

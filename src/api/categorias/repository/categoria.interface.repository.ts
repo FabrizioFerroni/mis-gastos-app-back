@@ -7,7 +7,8 @@ import { CategoriaEntity } from '../entity/categoria.entyty';
 @Injectable()
 export abstract class CategoriaInterfaceRepository extends BaseAbstractRepository<CategoriaEntity> {
   abstract guardar(data: CategoriaEntity): Promise<CategoriaEntity>;
-  abstract obtenerTodos(
+  abstract obtenerTodos(usuario: UsuarioEntity): Promise<CategoriaEntity[]>;
+  abstract obtenerTodosPorUsuario(
     usuario: UsuarioEntity,
     skip?: number,
     take?: number,

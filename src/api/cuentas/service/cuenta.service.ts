@@ -43,30 +43,21 @@ export class CuentaService {
     private readonly paginationService: PaginationService,
   ) {}
 
-  async findAll(param: PaginationDto) {
-    const { page, limit } = param;
+  async findAll(usuario_id: string) {
+    const cacheKey = `${KEY}_${separateUUIDUser(usuario_id)}_all`;
 
-    const take = limit ?? DefaultPageSize.ACCOUNT;
-    const skip = this.paginationService.calculateOffset(limit, page);
-
-    const cacheKey = `${KEY}-${page}-${limit}`;
+    const usuario = await this.usuarioServicio.findOne(usuario_id);
 
     const cuentasCache = await this.cacheManager.get<{
       cuentas: CuentaEntity[];
-      meta: PaginationMeta;
     }>(cacheKey);
 
-    const [data, count] = await this.cuentaRepository.obtenerTodosAndCount(
-      skip,
-      take,
-    );
+    const data = await this.cuentaRepository.obtenerTodos(usuario);
 
     const cuentas: CuentaEntity[] = this.transform.transformDtoArray(
       data,
       ResponseCuentaDto,
     );
-
-    const meta = this.paginationService.createMeta(limit, page, count);
 
     if (cuentasCache) {
       const respCuenta = this.transform.transformDtoArray(
@@ -74,10 +65,10 @@ export class CuentaService {
         ResponseCuentaDto,
       );
 
-      return { cuentas: respCuenta, meta: cuentasCache.meta };
+      return { cuentas: respCuenta };
     }
 
-    const response = { cuentas, meta };
+    const response = { cuentas };
     await this.cacheManager.set(cacheKey, response);
 
     return response;
@@ -216,8 +207,11 @@ export class CuentaService {
       }
     }
 
+    cuentaToUpdate.nroCuenta = nro_cuenta;
+
     // TODO: Ver como editar usuario
     delete cuentaToUpdate['usuario_id'];
+    delete cuentaToUpdate['nro_cuenta'];
 
     const cuentaUpdated = await this.cuentaRepository.actualizar(
       id,
@@ -327,8 +321,8 @@ export class CuentaService {
   }
 
   async invalidateAllCacheKeys() {
-    const keys = await this.cacheManager.store.keys(`${KEY}-*`);
-    const keys_user = await this.cacheManager.store.keys(`${KEY_USER}-*`);
+    const keys = await this.cacheManager.store.keys(`${KEY}_*`);
+    const keys_user = await this.cacheManager.store.keys(`${KEY_USER}_*`);
 
     for (const key of keys) {
       await this.cacheManager.del(key);

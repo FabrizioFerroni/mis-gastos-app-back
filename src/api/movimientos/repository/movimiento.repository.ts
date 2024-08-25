@@ -79,6 +79,10 @@ export class MovimientoRepository
         id: String(id),
         usuario: usuario,
       },
+      relations: {
+        cuenta: true,
+        categoria: true,
+      },
     };
 
     const movimiento = await this.findByCondition(options);

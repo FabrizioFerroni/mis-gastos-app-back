@@ -25,31 +25,14 @@ export class CuentaRepository
     super(repository);
   }
 
-  async obtenerTodos(skip?: number, take?: number): Promise<CuentaEntity[]> {
+  async obtenerTodos(usuario: UsuarioEntity): Promise<CuentaEntity[]> {
     const options = {
-      skip: skip,
-      take: take,
-      relations: {
-        usuario: true,
+      where: {
+        usuario: usuario,
       },
     };
 
     return await this.findAll(options);
-  }
-
-  async obtenerTodosAndCount(
-    skip?: number,
-    take?: number,
-  ): Promise<[CuentaEntity[], number]> {
-    const options = {
-      skip: skip,
-      take: take,
-      relations: {
-        usuario: true,
-      },
-    };
-
-    return await this.findAndCount(options);
   }
 
   async obtenerTodosPorUsuario(

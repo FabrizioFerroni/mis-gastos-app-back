@@ -48,7 +48,38 @@ export class CategoriaService {
     private readonly paginationService: PaginationService,
   ) {}
 
-  async findAll(usuario_id: string, param: PaginationDto) {
+  async findAll(usuario_id: string) {
+    const cacheKey = `${KEY}_${separateUUIDUser(usuario_id)}_all`;
+
+    const usuario = await this.usuarioServicio.findOne(usuario_id);
+
+    const categoriasCache = await this.cacheManager.get<{
+      categorias: CategoriaEntity[];
+    }>(cacheKey);
+
+    const data = await this.categoriaRepository.obtenerTodos(usuario);
+
+    const categorias: CategoriaEntity[] = this.transform.transformDtoArray(
+      data,
+      ResponseCategoriaDto,
+    );
+
+    if (categoriasCache) {
+      const respCuenta = this.transform.transformDtoArray(
+        categoriasCache.categorias,
+        ResponseCategoriaDto,
+      );
+
+      return { categorias: respCuenta };
+    }
+
+    const response = { categorias };
+    await this.cacheManager.set(cacheKey, response);
+
+    return response;
+  }
+
+  async findAllUser(usuario_id: string, param: PaginationDto) {
     const { page, limit } = param;
 
     const take = limit ?? DefaultPageSize.CATEGORY;
@@ -63,7 +94,7 @@ export class CategoriaService {
       meta: PaginationMeta;
     }>(cacheKey);
 
-    const [data, count] = await this.categoriaRepository.obtenerTodos(
+    const [data, count] = await this.categoriaRepository.obtenerTodosPorUsuario(
       usuario,
       skip,
       take,

@@ -84,6 +84,11 @@ export class MovimientosService {
       ResponseMovimientoDto,
     );
 
+    movimientos.forEach((movimiento) => {
+      const { usuario } = movimiento;
+      delete usuario.password;
+    });
+
     const meta = this.paginationService.createMeta(limit, page, count);
 
     if (movimientosCache) {
@@ -178,16 +183,17 @@ export class MovimientosService {
 
     switch (tipo) {
       case Tipos.INGRESO: {
-        newSaldo = saldoCuenta + movimiento;
+        newSaldo = Number(saldoCuenta) + Number(movimiento);
         break;
       }
 
       case Tipos.EGRESO: {
-        newSaldo = saldoCuenta - movimiento;
+        newSaldo = Number(saldoCuenta) - Number(movimiento);
         break;
       }
 
       default: {
+        newSaldo = saldoCuenta;
         break;
       }
     }
@@ -240,6 +246,8 @@ export class MovimientosService {
 
     const deleted = await this.movimientoRepository.borrar(id);
 
+    //TODO: Ver el tema de que si elimino un registro volver el saldo anterior de la cuenta que reste o sume...
+
     if (!deleted.affected) {
       throw new BadRequestException(
         MovimientoErrorMensaje.MOVEMENT_NOT_DELETED,
@@ -271,8 +279,8 @@ export class MovimientosService {
   }
 
   async invalidateAllCacheKeys() {
-    const keys = await this.cacheManager.store.keys(`${KEY}-*`);
-    const keys_user = await this.cacheManager.store.keys(`${KEY_USER}-*`);
+    const keys = await this.cacheManager.store.keys(`${KEY}_*`);
+    const keys_user = await this.cacheManager.store.keys(`${KEY_USER}_*`);
 
     for (const key of keys) {
       await this.cacheManager.del(key);

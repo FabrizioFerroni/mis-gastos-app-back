@@ -76,11 +76,16 @@ export class CategoriaController {
     type: 'number',
     required: false,
   })
-  findAll(
+  findAllUser(
     @User() { id: usuario_id }: UsuarioEntity,
     @Query() param: PaginationDto,
   ) {
-    return this.categoriaService.findAll(usuario_id, param);
+    return this.categoriaService.findAllUser(usuario_id, param);
+  }
+
+  @Get('listar')
+  findAll(@User() { id: usuario_id }: UsuarioEntity) {
+    return this.categoriaService.findAll(usuario_id);
   }
 
   @Get(':id')

@@ -13,7 +13,7 @@ import {
 import { TipoCuenta } from '../utils/cuentas.enum';
 
 @Entity({ name: 'cuentas' })
-@Unique(['nombre', 'nroCuenta'])
+@Unique(['nombre', 'nroCuenta', 'usuario'])
 export class CuentaEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
